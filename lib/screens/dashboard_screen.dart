@@ -9,6 +9,7 @@ import '../widgets/glass_card.dart';
 import 'clients_screen.dart';
 import 'settings_screen.dart';
 import 'merchant_screen.dart';
+import 'add_client_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -27,7 +28,6 @@ class DashboardScreen extends StatelessWidget {
           child: ListView(
             padding: const EdgeInsets.all(20),
             children: [
-              // Header
               Row(
                 children: [
                   Container(
@@ -60,7 +60,9 @@ class DashboardScreen extends StatelessWidget {
                       children: [
                         Text('أهلاً، ${p.merchantName}',
                             style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.w700)),
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                                color: context.appText)),
                         Text('نظرة سريعة على أعمالك',
                             style: TextStyle(
                                 color: context.appTextDim, fontSize: 12)),
@@ -72,15 +74,13 @@ class DashboardScreen extends StatelessWidget {
                       context,
                       MaterialPageRoute(builder: (_) => const SettingsScreen()),
                     ),
-                    icon: Icon(Icons.settings_rounded,
-                        color: context.appText),
+                    icon: Icon(Icons.settings_rounded, color: context.appText),
                   ),
                 ],
               ).animate().fadeIn(duration: 500.ms).slideY(begin: -0.1),
 
               const SizedBox(height: 24),
 
-              // Net balance card
               GlassCard(
                 gradient: LinearGradient(
                   colors: [
@@ -99,7 +99,7 @@ class DashboardScreen extends StatelessWidget {
                       children: [
                         Icon(Icons.account_balance_wallet_rounded,
                             color: context.appGreen, size: 22),
-                        SizedBox(width: 8),
+                        const SizedBox(width: 8),
                         Text('صافي الرصيد',
                             style: TextStyle(
                                 color: context.appTextDim, fontSize: 13)),
@@ -133,7 +133,6 @@ class DashboardScreen extends StatelessWidget {
 
               const SizedBox(height: 16),
 
-              // Credit / Debit small cards
               Row(
                 children: [
                   Expanded(
@@ -158,7 +157,6 @@ class DashboardScreen extends StatelessWidget {
 
               const SizedBox(height: 16),
 
-              // Merchant account card
               GlassCard(
                 onTap: () => Navigator.push(
                   context,
@@ -180,9 +178,11 @@ class DashboardScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('حسابي (التاجر)',
+                          Text('حسابي (التاجر)',
                               style: TextStyle(
-                                  fontSize: 15, fontWeight: FontWeight.w700)),
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                  color: context.appText)),
                           Text(
                             '${_fmt(p.merchantBalance.abs())} ج.م',
                             style: TextStyle(
@@ -196,50 +196,81 @@ class DashboardScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                    Icon(Icons.chevron_left,
-                        color: context.appTextDim),
+                    Icon(Icons.chevron_left, color: context.appTextDim),
                   ],
                 ),
               ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.1),
 
               const SizedBox(height: 24),
 
-              // Quick actions
+              Text('إجراءات سريعة',
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: context.appText)).animate().fadeIn(delay: 320.ms),
+              const SizedBox(height: 12),
               Row(
                 children: [
                   Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () => Navigator.push(
+                    child: _quickActionButton(
+                      context,
+                      icon: Icons.person_add_alt_1_rounded,
+                      label: 'عميل جديد',
+                      color: context.appGreen,
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => const AddClientScreen()),
+                      ).then((_) => p.init()),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _quickActionButton(
+                      context,
+                      icon: Icons.people_alt_rounded,
+                      label: 'العملاء',
+                      color: context.appGreen,
+                      onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
                             builder: (_) => const ClientsScreen()),
                       ).then((_) => p.init()),
-                      icon: const Icon(Icons.people_alt_rounded),
-                      label: const Text('العملاء'),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 18),
-                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _quickActionButton(
+                      context,
+                      icon: Icons.picture_as_pdf_rounded,
+                      label: 'التقارير',
+                      color: context.appGold,
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('شاشة التقارير هتتوفر قريباً')),
+                        );
+                      },
                     ),
                   ),
                 ],
-              ).animate().fadeIn(delay: 350.ms),
+              ).animate().fadeIn(delay: 350.ms).slideY(begin: 0.1),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 28),
 
-              // Recent clients
-              const Padding(
-                padding: EdgeInsets.only(bottom: 8),
-                child: Text('آخر العملاء',
-                    style: TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.w700)),
-              ),
+              Text('آخر العملاء',
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: context.appText)),
+              const SizedBox(height: 12),
               if (p.clients.isEmpty)
                 GlassCard(
                   child: Column(
                     children: [
                       Icon(Icons.person_add_alt_1_rounded,
                           color: context.appTextDim, size: 40),
-                      SizedBox(height: 8),
+                      const SizedBox(height: 8),
                       Text('لا يوجد عملاء بعد',
                           style: TextStyle(color: context.appTextDim)),
                     ],
@@ -276,7 +307,8 @@ class DashboardScreen extends StatelessWidget {
                             children: [
                               Text(c.name,
                                   style: TextStyle(
-                                      fontWeight: FontWeight.w700)),
+                                      fontWeight: FontWeight.w700,
+                                      color: context.appText)),
                               Text('${c.category.emoji} ${c.category.arName}',
                                   style: TextStyle(
                                       fontSize: 11,
@@ -300,6 +332,38 @@ class DashboardScreen extends StatelessWidget {
                 }),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _quickActionButton(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+        decoration: BoxDecoration(
+          color: context.appCard,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: context.appBorder),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: color, size: 28),
+            const SizedBox(height: 8),
+            Text(label,
+                style: TextStyle(
+                    color: context.appText,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600),
+                textAlign: TextAlign.center),
+          ],
         ),
       ),
     );

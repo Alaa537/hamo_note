@@ -88,7 +88,6 @@ class ClientDetailsScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // Balance header
           GlassCard(
             gradient: LinearGradient(
               colors: [
@@ -171,12 +170,10 @@ class ClientDetailsScreen extends StatelessWidget {
 
           const SizedBox(height: 14),
 
-          // Settlement big action (if not zero)
           if (client.balance != 0) _settlementCard(context, p, client),
 
           const SizedBox(height: 14),
 
-          // Regular actions
           Row(
             children: [
               Expanded(
@@ -362,15 +359,21 @@ class ClientDetailsScreen extends StatelessWidget {
             ),
           ),
           IconButton(
-            tooltip: 'مشاركة وصل',
+            tooltip: 'مشاركة وصل كصورة',
             icon: Icon(Icons.share_rounded,
                 color: context.appTextDim, size: 20),
-            onPressed: () => PdfService.shareReceipt(
-              client: client,
-              transaction: t,
-              merchantName: p.merchantName,
-              currentBalance: client.balance,
-            ),
+            onPressed: () async {
+              final bytes = await PdfService.buildReceipt(
+                client: client,
+                transaction: t,
+                merchantName: p.merchantName,
+                currentBalance: client.balance,
+              );
+              await PdfService.sharePdfAsImage(
+                pdfBytes: bytes,
+                filename: 'Receipt_${client.name}_${t.id}',
+              );
+            },
           ),
           IconButton(
             icon: Icon(Icons.delete_outline,
@@ -471,7 +474,7 @@ class ClientDetailsScreen extends StatelessWidget {
       if (ctx.mounted) {
         ScaffoldMessenger.of(ctx).showSnackBar(
           SnackBar(
-            content: Text('✅ تم الحفظ بنجاح'),
+            content: const Text('✅ تم الحفظ بنجاح'),
             backgroundColor: color,
           ),
         );

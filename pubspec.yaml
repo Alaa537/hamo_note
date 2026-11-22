@@ -22,6 +22,7 @@ dependencies:
   printing: ^5.13.2
   path_provider: ^2.1.4
   share_plus: ^10.0.1
+  pdfx: ^2.6.0
 
 dev_dependencies:
   flutter_test:
@@ -32,6 +33,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
+    - assets/fonts/
 
 dependency_overrides:
   archive: ^4.1.0

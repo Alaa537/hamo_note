@@ -1,8 +1,13 @@
+import 'dart:io';
 import 'dart:typed_data';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:pdfx/pdfx.dart' as pdfx;
 import '../models/client.dart';
 import '../models/transaction.dart';
 
@@ -11,12 +16,16 @@ class PdfService {
   static final _dateTimeFmt = DateFormat('yyyy/MM/dd HH:mm');
   static final _shortTimeFmt = DateFormat('dd/MM  HH:mm');
 
-  static Future<pw.Font> _reg() => PdfGoogleFonts.cairoRegular();
-  static Future<pw.Font> _bold() => PdfGoogleFonts.cairoBold();
+  static Future<pw.Font> _reg() async {
+    final fontData = await rootBundle.load("assets/fonts/Cairo-Regular.ttf");
+    return pw.Font.ttf(fontData);
+  }
 
-  // ============================================================
-  //  STATEMENT — A4 invoice-style
-  // ============================================================
+  static Future<pw.Font> _bold() async {
+    final fontData = await rootBundle.load("assets/fonts/Cairo-Bold.ttf");
+    return pw.Font.ttf(fontData);
+  }
+
   static Future<Uint8List> buildStatement({
     required Client client,
     required String merchantName,
@@ -113,7 +122,6 @@ class PdfService {
           ),
         ),
         build: (ctx) => [
-          // Client info card
           pw.Container(
             padding: const pw.EdgeInsets.all(16),
             decoration: pw.BoxDecoration(
@@ -156,7 +164,6 @@ class PdfService {
             ),
           ),
           pw.SizedBox(height: 14),
-          // Balance big box
           pw.Container(
             padding: const pw.EdgeInsets.all(18),
             decoration: pw.BoxDecoration(
@@ -204,7 +211,6 @@ class PdfService {
               style: pw.TextStyle(
                   font: bold, fontSize: 14, color: PdfColor.fromHex('#1A1F2E'))),
           pw.SizedBox(height: 8),
-          // Table
           pw.Table(
             border: pw.TableBorder.all(
                 color: PdfColor.fromHex('#E3E8EF'), width: 0.5),
@@ -253,7 +259,6 @@ class PdfService {
             ],
           ),
           pw.SizedBox(height: 24),
-          // Footer with signature
           pw.Container(
             padding: const pw.EdgeInsets.only(top: 14),
             decoration: pw.BoxDecoration(
@@ -306,9 +311,6 @@ class PdfService {
     return doc.save();
   }
 
-  // ============================================================
-  //  RECEIPT — Thermal 80mm
-  // ============================================================
   static Future<Uint8List> buildReceipt({
     required Client client,
     required Transaction transaction,
@@ -442,9 +444,6 @@ class PdfService {
     return doc.save();
   }
 
-  // ============================================================
-  //  SHARE HELPERS
-  // ============================================================
   static Future<void> shareStatement({
     required Client client,
     required String merchantName,
@@ -477,9 +476,33 @@ class PdfService {
     );
   }
 
-  // ============================================================
-  //  Small helpers
-  // ============================================================
+  static Future<void> sharePdfAsImage({
+    required Uint8List pdfBytes,
+    required String filename,
+  }) async {
+    final tempDir = await getTemporaryDirectory();
+    final pdfFile = File('${tempDir.path}/temp_$filename.pdf');
+    await pdfFile.writeAsBytes(pdfBytes);
+
+    final document = await pdfx.PdfDocument.openFile(pdfFile.path);
+    final page = await document.getPage(1);
+    final pageImage = await page.render(
+      width: page.width * 3,
+      height: page.height * 3,
+      format: pdfx.PdfPageImageFormat.png,
+    );
+    await page.close();
+    await document.close();
+
+    if (pageImage != null) {
+      final imageFile = File('${tempDir.path}/$filename.png');
+      await imageFile.writeAsBytes(pageImage.bytes);
+      await Share.shareXFiles([XFile(imageFile.path)], text: 'وصل من Hamo Note');
+      await imageFile.delete();
+    }
+    await pdfFile.delete();
+  }
+
   static pw.Widget _dashed() => pw.Container(
         height: 0.5,
         color: PdfColor.fromHex('#BFC7D2'),
