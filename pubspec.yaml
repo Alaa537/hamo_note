@@ -34,4 +34,4 @@ flutter:
     - assets/images/
 
 dependency_overrides:
-  image: ^4.1.7
+  archive: ^4.1.0

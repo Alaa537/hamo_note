@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
 import '../providers/app_provider.dart';
+import '../models/client.dart';
 import '../theme/app_theme.dart';
 import '../widgets/glass_card.dart';
 import 'clients_screen.dart';
