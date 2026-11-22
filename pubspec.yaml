@@ -32,3 +32,6 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
+
+dependency_overrides:
+  image: ^4.1.7

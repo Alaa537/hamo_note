@@ -6,6 +6,7 @@ import '../providers/app_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/glass_card.dart';
 import '../models/transaction.dart';
+import '../models/client.dart';
 import '../services/pdf_service.dart';
 import 'add_transaction_screen.dart';
 import 'edit_client_screen.dart';

@@ -9,15 +9,8 @@ import '../models/transaction.dart';
 class PdfService {
   static final _dateFmt = DateFormat('yyyy/MM/dd  HH:mm');
 
-  static Future<pw.Font> _arabicFont() async {
-    final ttf = await PdfGoogleFonts.cairoRegular();
-    return pw.Font.ttf(ttf);
-  }
-
-  static Future<pw.Font> _arabicBold() async {
-    final ttf = await PdfGoogleFonts.cairoBold();
-    return pw.Font.ttf(ttf);
-  }
+  static Future<pw.Font> _arabicFont() => PdfGoogleFonts.cairoRegular();
+  static Future<pw.Font> _arabicBold() => PdfGoogleFonts.cairoBold();
 
   static Future<Uint8List> buildClientStatement({
     required Client client,
@@ -52,11 +45,15 @@ class PdfService {
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
                     pw.Text('Hamo Note',
-                        style: pw.TextStyle(font: bold, fontSize: 26,
+                        style: pw.TextStyle(
+                            font: bold,
+                            fontSize: 26,
                             color: PdfColor.fromHex('#00E676'))),
                     pw.SizedBox(height: 4),
                     pw.Text('كشف حساب عميل',
-                        style: pw.TextStyle(font: font, fontSize: 14,
+                        style: pw.TextStyle(
+                            font: font,
+                            fontSize: 14,
                             color: PdfColors.white)),
                   ],
                 ),
@@ -64,10 +61,14 @@ class PdfService {
                   crossAxisAlignment: pw.CrossAxisAlignment.end,
                   children: [
                     pw.Text('التاجر: $merchantName',
-                        style: pw.TextStyle(font: bold, fontSize: 12,
+                        style: pw.TextStyle(
+                            font: bold,
+                            fontSize: 12,
                             color: PdfColors.white)),
                     pw.Text(_dateFmt.format(DateTime.now()),
-                        style: pw.TextStyle(font: font, fontSize: 10,
+                        style: pw.TextStyle(
+                            font: font,
+                            fontSize: 10,
                             color: PdfColor.fromHex('#8A93A8'))),
                   ],
                 ),
@@ -108,10 +109,14 @@ class PdfService {
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
                 pw.Text('الرصيد الحالي',
-                    style: pw.TextStyle(font: bold, fontSize: 16,
+                    style: pw.TextStyle(
+                        font: bold,
+                        fontSize: 16,
                         color: PdfColors.black)),
                 pw.Text('$balanceStr ج.م  ($balanceLabel)',
-                    style: pw.TextStyle(font: bold, fontSize: 18,
+                    style: pw.TextStyle(
+                        font: bold,
+                        fontSize: 18,
                         color: PdfColors.black)),
               ],
             ),
@@ -121,25 +126,29 @@ class PdfService {
               style: pw.TextStyle(font: bold, fontSize: 16)),
           pw.SizedBox(height: 10),
           pw.TableHelper.fromTextArray(
-            headerStyle: pw.TextStyle(font: bold, fontSize: 11,
-                color: PdfColors.white),
+            headerStyle: pw.TextStyle(
+                font: bold, fontSize: 11, color: PdfColors.white),
             cellStyle: pw.TextStyle(font: font, fontSize: 10),
             headerDecoration: pw.BoxDecoration(
               color: PdfColor.fromHex('#141C2E'),
             ),
             cellAlignment: pw.Alignment.centerRight,
             headers: ['التاريخ', 'النوع', 'المبلغ', 'ملاحظة'],
-            data: client.transactions.reversed.map((t) => [
-              _dateFmt.format(t.date),
-              t.type.arName,
-              '${t.amount.toStringAsFixed(2)} ج.م',
-              t.note,
-            ]).toList(),
+            data: client.transactions.reversed
+                .map((t) => [
+                      _dateFmt.format(t.date),
+                      t.type.arName,
+                      '${t.amount.toStringAsFixed(2)} ج.م',
+                      t.note,
+                    ])
+                .toList(),
           ),
           pw.SizedBox(height: 30),
           pw.Center(
             child: pw.Text('تم الإنشاء بواسطة Hamo Note 💚',
-                style: pw.TextStyle(font: font, fontSize: 10,
+                style: pw.TextStyle(
+                    font: font,
+                    fontSize: 10,
                     color: PdfColor.fromHex('#8A93A8'))),
           ),
         ],
@@ -157,7 +166,9 @@ class PdfService {
           pw.SizedBox(
             width: 70,
             child: pw.Text('$k:',
-                style: pw.TextStyle(font: font, fontSize: 11,
+                style: pw.TextStyle(
+                    font: font,
+                    fontSize: 11,
                     color: PdfColor.fromHex('#8A93A8'))),
           ),
           pw.Expanded(
@@ -177,7 +188,8 @@ class PdfService {
         client: client, merchantName: merchantName);
     await Printing.sharePdf(
       bytes: bytes,
-      filename: 'HamoNote_${client.name}_${DateTime.now().millisecondsSinceEpoch}.pdf',
+      filename:
+          'HamoNote_${client.name}_${DateTime.now().millisecondsSinceEpoch}.pdf',
     );
   }
 }
