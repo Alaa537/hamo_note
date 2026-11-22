@@ -1,5 +1,4 @@
 name: krinry Build
-
 on:
   workflow_dispatch:
     inputs:
@@ -15,53 +14,48 @@ on:
         default: 'apk'
         type: choice
         options: [apk, appbundle, apk-split]
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.41.0'
           channel: 'stable'
-
       - name: Pub get
         run: flutter pub get
-
       - name: Clean project
         run: flutter clean
-
       - name: Create android folder
         run: flutter create --platforms android --org com.alaa .
-
-      - name: Fix Android Manifest for v2 embedding
+      - name: Fix Gradle build path
+        run: |
+          # Fix the deprecated buildDir issue that causes APK not found
+          sed -i "s|rootProject.buildDir = '../build'|rootProject.layout.buildDirectory = '../build'|" android/build.gradle
+          sed -i "s|project.buildDir = \"\${rootProject.buildDir}/\${project.name}\"|project.layout.buildDirectory = \"\${rootProject.layout.buildDirectory.get()}/\${project.name}\"|" android/build.gradle
+      - name: Fix Android Manifest
         run: |
           sed -i 's|android:name="io.flutter.app.FlutterApplication"|android:name="${applicationName}"|' android/app/src/main/AndroidManifest.xml
           sed -i 's|io.flutter.app.android.SplashScreenUntilFirstFrame|flutterEmbedding|' android/app/src/main/AndroidManifest.xml
-
       - name: Fix app name
         run: |
           sed -i 's/android:label="hamo_note"/android:label="Hamo Note"/g' android/app/src/main/AndroidManifest.xml || true
-
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
-
       - name: Build
         run: |
           TYPE="${{ github.event.inputs.build_type }}"
           OUT="${{ github.event.inputs.output_type }}"
           if [ "$OUT" = "apk" ]; then
-            flutter build apk --$TYPE --no-version-check
+            flutter build apk --$TYPE
           elif [ "$OUT" = "apk-split" ]; then
-            flutter build apk --$TYPE --split-per-abi --no-version-check
+            flutter build apk --$TYPE --split-per-abi
           elif [ "$OUT" = "appbundle" ]; then
-            flutter build appbundle --$TYPE --no-version-check
+            flutter build appbundle --$TYPE
           fi
-
       - uses: actions/upload-artifact@v4
         with:
           name: build-output
