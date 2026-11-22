@@ -30,6 +30,9 @@ jobs:
       - name: Pub get
         run: flutter pub get
 
+      - name: Clean project
+        run: flutter clean
+
       - name: Create android folder
         run: flutter create --platforms android --org com.alaa .
 
@@ -52,11 +55,11 @@ jobs:
           TYPE="${{ github.event.inputs.build_type }}"
           OUT="${{ github.event.inputs.output_type }}"
           if [ "$OUT" = "apk" ]; then
-            flutter build apk --$TYPE
+            flutter build apk --$TYPE --no-version-check
           elif [ "$OUT" = "apk-split" ]; then
-            flutter build apk --$TYPE --split-per-abi
+            flutter build apk --$TYPE --split-per-abi --no-version-check
           elif [ "$OUT" = "appbundle" ]; then
-            flutter build appbundle --$TYPE
+            flutter build appbundle --$TYPE --no-version-check
           fi
 
       - uses: actions/upload-artifact@v4
