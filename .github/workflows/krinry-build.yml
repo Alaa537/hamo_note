@@ -14,38 +14,58 @@ on:
         default: 'apk'
         type: choice
         options: [apk, appbundle, apk-split]
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.41.0'
           channel: 'stable'
+
       - name: Pub get
         run: flutter pub get
-      - name: Clean project
-        run: flutter clean
+
       - name: Create android folder
         run: flutter create --platforms android --org com.alaa .
-      - name: Fix Gradle build path
+
+      - name: Rewrite android/build.gradle (fix APK path)
         run: |
-          # Fix the deprecated buildDir issue that causes APK not found
-          sed -i "s|rootProject.buildDir = '../build'|rootProject.layout.buildDirectory = '../build'|" android/build.gradle
-          sed -i "s|project.buildDir = \"\${rootProject.buildDir}/\${project.name}\"|project.layout.buildDirectory = \"\${rootProject.layout.buildDirectory.get()}/\${project.name}\"|" android/build.gradle
-      - name: Fix Android Manifest
+          cat > android/build.gradle << 'GRADLE_EOF'
+          allprojects {
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+
+          rootProject.buildDir = "../build"
+          subprojects {
+              project.buildDir = "${rootProject.buildDir}/${project.name}"
+          }
+          subprojects {
+              project.evaluationDependsOn(":app")
+          }
+
+          tasks.register("clean", Delete) {
+              delete rootProject.buildDir
+          }
+          GRADLE_EOF
+
+      - name: Fix Android Manifest for v2 embedding
         run: |
-          sed -i 's|android:name="io.flutter.app.FlutterApplication"|android:name="${applicationName}"|' android/app/src/main/AndroidManifest.xml
-          sed -i 's|io.flutter.app.android.SplashScreenUntilFirstFrame|flutterEmbedding|' android/app/src/main/AndroidManifest.xml
-      - name: Fix app name
-        run: |
-          sed -i 's/android:label="hamo_note"/android:label="Hamo Note"/g' android/app/src/main/AndroidManifest.xml || true
+          sed -i 's|android:name="io.flutter.app.FlutterApplication"|android:name="${applicationName}"|' android/app/src/main/AndroidManifest.xml || true
+          sed -i 's|android:label="hamo_note"|android:label="Hamo Note"|g' android/app/src/main/AndroidManifest.xml || true
+
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
-      - name: Build
+
+      - name: Build APK
         run: |
           TYPE="${{ github.event.inputs.build_type }}"
           OUT="${{ github.event.inputs.output_type }}"
@@ -56,10 +76,22 @@ jobs:
           elif [ "$OUT" = "appbundle" ]; then
             flutter build appbundle --$TYPE
           fi
+
+      - name: Diagnose — find all produced APKs
+        if: always()
+        run: |
+          echo "=== Searching for APK files ==="
+          find . -name "*.apk" -o -name "*.aab" | head -20
+          echo ""
+          echo "=== build/ directory tree ==="
+          find build -type f 2>/dev/null | head -20 || echo "(no build/ dir)"
+
       - uses: actions/upload-artifact@v4
         with:
           name: build-output
           path: |
-            build/app/outputs/flutter-apk/*.apk
-            build/app/outputs/bundle/*/*.aab
+            build/**/*.apk
+            build/**/*.aab
+            android/**/*.apk
+            android/**/*.aab
           retention-days: 7
