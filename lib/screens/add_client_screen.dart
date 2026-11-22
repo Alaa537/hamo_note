@@ -31,24 +31,37 @@ class _AddClientScreenState extends State<AddClientScreen> {
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          const Text('الاسم', style: TextStyle(fontWeight: FontWeight.w600)),
-          const SizedBox(height: 8),
+          _sectionHeader(context, Icons.person_rounded, 'بيانات أساسية'),
+          const SizedBox(height: 12),
           TextField(
             controller: _name,
-            decoration: const InputDecoration(hintText: 'مثال: أحمد محمد'),
+            style: TextStyle(
+                color: context.appText,
+                fontSize: 16,
+                fontWeight: FontWeight.w600),
+            decoration: const InputDecoration(
+              labelText: 'اسم العميل',
+              hintText: 'مثال: أحمد محمد',
+              prefixIcon: Icon(Icons.person_outline_rounded),
+            ),
           ),
-          const SizedBox(height: 16),
-          const Text('رقم الهاتف',
-              style: TextStyle(fontWeight: FontWeight.w600)),
-          const SizedBox(height: 8),
+          const SizedBox(height: 14),
           TextField(
             controller: _phone,
             keyboardType: TextInputType.phone,
-            decoration: const InputDecoration(hintText: '01xxxxxxxxx'),
+            style: TextStyle(
+                color: context.appText,
+                fontSize: 16,
+                fontWeight: FontWeight.w600),
+            decoration: const InputDecoration(
+              labelText: 'رقم الهاتف',
+              hintText: '01xxxxxxxxx',
+              prefixIcon: Icon(Icons.phone_rounded),
+            ),
           ),
-          const SizedBox(height: 16),
-          const Text('الفئة', style: TextStyle(fontWeight: FontWeight.w600)),
-          const SizedBox(height: 8),
+          const SizedBox(height: 24),
+          _sectionHeader(context, Icons.category_rounded, 'الفئة'),
+          const SizedBox(height: 12),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -58,41 +71,74 @@ class _AddClientScreenState extends State<AddClientScreen> {
                 label: Text('${c.emoji} ${c.arName}'),
                 selected: sel,
                 onSelected: (_) => setState(() => category = c),
-                selectedColor: AppColors.green.withOpacity(0.25),
-                backgroundColor: AppColors.cardLight,
+                selectedColor: context.appGreen.withOpacity(0.2),
+                backgroundColor: context.appCardLight,
                 labelStyle: TextStyle(
-                  color: sel ? AppColors.green : AppColors.text,
-                  fontWeight: FontWeight.w600,
+                  color: sel ? context.appGreen : context.appText,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13,
                 ),
                 side: BorderSide(
-                  color: sel ? AppColors.green : AppColors.border,
+                  color: sel ? context.appGreen : context.appBorder,
+                  width: sel ? 1.5 : 1,
                 ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               );
             }).toList(),
           ),
-          const SizedBox(height: 16),
-          const Text('ملاحظة (اختياري)',
-              style: TextStyle(fontWeight: FontWeight.w600)),
-          const SizedBox(height: 8),
+          const SizedBox(height: 24),
+          _sectionHeader(context, Icons.notes_rounded, 'ملاحظة (اختياري)'),
+          const SizedBox(height: 12),
           TextField(
             controller: _note,
-            maxLines: 2,
-            decoration: const InputDecoration(hintText: 'أي تفاصيل إضافية'),
+            maxLines: 3,
+            style: TextStyle(color: context.appText, fontSize: 14),
+            decoration: const InputDecoration(
+              hintText: 'أي تفاصيل إضافية عن العميل...',
+              prefixIcon: Icon(Icons.edit_note_rounded),
+            ),
           ),
-          const SizedBox(height: 28),
-          ElevatedButton(
-            onPressed: _save,
-            child: const Text('حفظ العميل'),
+          const SizedBox(height: 32),
+          SizedBox(
+            height: 56,
+            child: ElevatedButton.icon(
+              onPressed: _save,
+              icon: const Icon(Icons.check_rounded),
+              label: const Text('حفظ العميل', style: TextStyle(fontSize: 16)),
+            ),
           ),
         ],
       ),
     );
   }
 
+  Widget _sectionHeader(BuildContext context, IconData icon, String text) {
+    return Row(children: [
+      Container(
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: context.appGreen.withOpacity(0.15),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(icon, color: context.appGreen, size: 16),
+      ),
+      const SizedBox(width: 8),
+      Text(text,
+          style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: context.appText)),
+    ]);
+  }
+
   Future<void> _save() async {
     if (_name.text.trim().isEmpty || _phone.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('من فضلك املأ الاسم والهاتف')),
+        SnackBar(
+          content: const Text('من فضلك املأ الاسم والهاتف'),
+          backgroundColor: context.appRed,
+        ),
       );
       return;
     }
@@ -102,6 +148,14 @@ class _AddClientScreenState extends State<AddClientScreen> {
           category: category,
           note: _note.text.trim().isEmpty ? null : _note.text.trim(),
         );
-    if (mounted) Navigator.pop(context);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('✅ تم إضافة العميل'),
+          backgroundColor: context.appGreen,
+        ),
+      );
+      Navigator.pop(context);
+    }
   }
 }

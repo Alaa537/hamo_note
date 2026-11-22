@@ -22,7 +22,7 @@ class DashboardScreen extends StatelessWidget {
     return Scaffold(
       body: SafeArea(
         child: RefreshIndicator(
-          color: AppColors.green,
+          color: context.appGreen,
           onRefresh: () => p.init(),
           child: ListView(
             padding: const EdgeInsets.all(20),
@@ -35,12 +35,12 @@ class DashboardScreen extends StatelessWidget {
                     height: 52,
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
-                        colors: [AppColors.green, AppColors.greenDark],
+                        colors: [context.appGreen, context.appGreenDark],
                       ),
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.green.withOpacity(0.35),
+                          color: context.appGreen.withOpacity(0.35),
                           blurRadius: 20,
                         ),
                       ],
@@ -59,11 +59,11 @@ class DashboardScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('أهلاً، ${p.merchantName}',
-                            style: const TextStyle(
+                            style: TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.w700)),
                         const Text('نظرة سريعة على أعمالك',
                             style: TextStyle(
-                                color: AppColors.textDim, fontSize: 12)),
+                                color: context.appTextDim, fontSize: 12)),
                       ],
                     ),
                   ).animate().fadeIn().slideX(begin: 0.2),
@@ -73,7 +73,7 @@ class DashboardScreen extends StatelessWidget {
                       MaterialPageRoute(builder: (_) => const SettingsScreen()),
                     ),
                     icon: const Icon(Icons.settings_rounded,
-                        color: AppColors.text),
+                        color: context.appText),
                   ),
                 ],
               ).animate().fadeIn(duration: 500.ms).slideY(begin: -0.1),
@@ -84,13 +84,13 @@ class DashboardScreen extends StatelessWidget {
               GlassCard(
                 gradient: LinearGradient(
                   colors: [
-                    AppColors.green.withOpacity(0.25),
-                    AppColors.card,
+                    context.appGreen.withOpacity(0.25),
+                    context.appCard,
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-                borderColor: AppColors.green.withOpacity(0.4),
+                borderColor: context.appGreen.withOpacity(0.4),
                 padding: const EdgeInsets.all(22),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -98,11 +98,11 @@ class DashboardScreen extends StatelessWidget {
                     const Row(
                       children: [
                         Icon(Icons.account_balance_wallet_rounded,
-                            color: AppColors.green, size: 22),
+                            color: context.appGreen, size: 22),
                         SizedBox(width: 8),
                         Text('صافي الرصيد',
                             style: TextStyle(
-                                color: AppColors.textDim, fontSize: 13)),
+                                color: context.appTextDim, fontSize: 13)),
                       ],
                     ),
                     const SizedBox(height: 12),
@@ -112,8 +112,8 @@ class DashboardScreen extends StatelessWidget {
                         fontSize: 34,
                         fontWeight: FontWeight.w900,
                         color: p.netBalance >= 0
-                            ? AppColors.green
-                            : AppColors.red,
+                            ? context.appGreen
+                            : context.appRed,
                         letterSpacing: -0.5,
                       ),
                     ),
@@ -122,8 +122,8 @@ class DashboardScreen extends StatelessWidget {
                       p.netBalance >= 0 ? 'له (رصيد إيجابي)' : 'عليه (رصيد سالب)',
                       style: TextStyle(
                         color: p.netBalance >= 0
-                            ? AppColors.green.withOpacity(0.8)
-                            : AppColors.red.withOpacity(0.8),
+                            ? context.appGreen.withOpacity(0.8)
+                            : context.appRed.withOpacity(0.8),
                         fontSize: 12,
                       ),
                     ),
@@ -141,7 +141,7 @@ class DashboardScreen extends StatelessWidget {
                       title: 'إجمالي له',
                       value: _fmt(p.totalCredit),
                       icon: Icons.arrow_downward_rounded,
-                      color: AppColors.green,
+                      color: context.appGreen,
                     ).animate().fadeIn(delay: 200.ms).slideX(begin: -0.15),
                   ),
                   const SizedBox(width: 12),
@@ -150,7 +150,7 @@ class DashboardScreen extends StatelessWidget {
                       title: 'إجمالي عليه',
                       value: _fmt(p.totalDebit),
                       icon: Icons.arrow_upward_rounded,
-                      color: AppColors.red,
+                      color: context.appRed,
                     ).animate().fadeIn(delay: 250.ms).slideX(begin: 0.15),
                   ),
                 ],
@@ -169,11 +169,11 @@ class DashboardScreen extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: AppColors.gold.withOpacity(0.15),
+                        color: context.appGold.withOpacity(0.15),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Icon(Icons.storefront_rounded,
-                          color: AppColors.gold, size: 26),
+                          color: context.appGold, size: 26),
                     ),
                     const SizedBox(width: 14),
                     Expanded(
@@ -187,8 +187,8 @@ class DashboardScreen extends StatelessWidget {
                             '${_fmt(p.merchantBalance.abs())} ج.م',
                             style: TextStyle(
                               color: p.merchantBalance >= 0
-                                  ? AppColors.gold
-                                  : AppColors.red,
+                                  ? context.appGold
+                                  : context.appRed,
                               fontSize: 18,
                               fontWeight: FontWeight.w800,
                             ),
@@ -197,7 +197,7 @@ class DashboardScreen extends StatelessWidget {
                       ),
                     ),
                     const Icon(Icons.chevron_left,
-                        color: AppColors.textDim),
+                        color: context.appTextDim),
                   ],
                 ),
               ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.1),
@@ -238,10 +238,10 @@ class DashboardScreen extends StatelessWidget {
                   child: Column(
                     children: const [
                       Icon(Icons.person_add_alt_1_rounded,
-                          color: AppColors.textDim, size: 40),
+                          color: context.appTextDim, size: 40),
                       SizedBox(height: 8),
                       Text('لا يوجد عملاء بعد',
-                          style: TextStyle(color: AppColors.textDim)),
+                          style: TextStyle(color: context.appTextDim)),
                     ],
                   ),
                 )
@@ -260,11 +260,11 @@ class DashboardScreen extends StatelessWidget {
                         CircleAvatar(
                           radius: 22,
                           backgroundColor:
-                              AppColors.green.withOpacity(0.15),
+                              context.appGreen.withOpacity(0.15),
                           child: Text(
                             c.name.isNotEmpty ? c.name[0] : '?',
-                            style: const TextStyle(
-                                color: AppColors.green,
+                            style: TextStyle(
+                                color: context.appGreen,
                                 fontWeight: FontWeight.w800,
                                 fontSize: 18),
                           ),
@@ -275,12 +275,12 @@ class DashboardScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(c.name,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                       fontWeight: FontWeight.w700)),
                               Text('${c.category.emoji} ${c.category.arName}',
                                   style: const TextStyle(
                                       fontSize: 11,
-                                      color: AppColors.textDim)),
+                                      color: context.appTextDim)),
                             ],
                           ),
                         ),
@@ -288,8 +288,8 @@ class DashboardScreen extends StatelessWidget {
                           '${_fmt(c.balance.abs())}',
                           style: TextStyle(
                             color: c.balance >= 0
-                                ? AppColors.green
-                                : AppColors.red,
+                                ? context.appGreen
+                                : context.appRed,
                             fontWeight: FontWeight.w800,
                             fontSize: 15,
                           ),
@@ -338,8 +338,8 @@ class _StatCard extends StatelessWidget {
               const SizedBox(width: 6),
               Expanded(
                 child: Text(title,
-                    style: const TextStyle(
-                        color: AppColors.textDim, fontSize: 12),
+                    style: TextStyle(
+                        color: context.appTextDim, fontSize: 12),
                     overflow: TextOverflow.ellipsis),
               ),
             ],

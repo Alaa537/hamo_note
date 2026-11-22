@@ -11,6 +11,7 @@ class Transaction {
   final double amount;
   final String note;
   final DateTime date;
+  final bool isSettlement;
 
   Transaction({
     required this.id,
@@ -18,6 +19,7 @@ class Transaction {
     required this.amount,
     this.note = '',
     required this.date,
+    this.isSettlement = false,
   });
 
   double get signedAmount => type == TxType.credit ? amount : -amount;
@@ -28,6 +30,7 @@ class Transaction {
     'amount': amount,
     'note': note,
     'date': date.toIso8601String(),
+    'isSettlement': isSettlement,
   };
 
   factory Transaction.fromJson(Map<String, dynamic> j) => Transaction(
@@ -36,5 +39,6 @@ class Transaction {
     amount: (j['amount'] as num).toDouble(),
     note: j['note'] ?? '',
     date: DateTime.parse(j['date']),
+    isSettlement: j['isSettlement'] ?? false,
   );
 }

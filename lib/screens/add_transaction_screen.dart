@@ -30,7 +30,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   @override
   Widget build(BuildContext context) {
     final isCredit = widget.type == TxType.credit;
-    final color = isCredit ? AppColors.green : AppColors.red;
+    final color = isCredit ? context.appGreen : context.appRed;
 
     return Scaffold(
       appBar: AppBar(

@@ -55,10 +55,10 @@ class _EditClientScreenState extends State<EditClientScreen> {
                 label: Text('${c.emoji} ${c.arName}'),
                 selected: sel,
                 onSelected: (_) => setState(() => category = c),
-                selectedColor: AppColors.green.withOpacity(0.25),
-                backgroundColor: AppColors.cardLight,
+                selectedColor: context.appGreen.withOpacity(0.25),
+                backgroundColor: context.appCardLight,
                 labelStyle: TextStyle(
-                    color: sel ? AppColors.green : AppColors.text),
+                    color: sel ? context.appGreen : context.appText),
               );
             }).toList(),
           ),

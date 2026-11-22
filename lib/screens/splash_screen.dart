@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/app_provider.dart';
 import '../theme/app_theme.dart';
 import 'dashboard_screen.dart';
+import 'onboarding_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -33,16 +36,18 @@ class _SplashScreenState extends State<SplashScreen>
       if (mounted) _subFade.forward();
     });
     Timer(const Duration(milliseconds: 3800), () {
-      if (mounted) {
-        Navigator.of(context).pushReplacement(
-          PageRouteBuilder(
-            transitionDuration: const Duration(milliseconds: 700),
-            pageBuilder: (_, __, ___) => const DashboardScreen(),
-            transitionsBuilder: (_, anim, __, child) =>
-                FadeTransition(opacity: anim, child: child),
-          ),
-        );
-      }
+      if (!mounted) return;
+      final shown = context.read<AppProvider>().onboardingShown;
+      Navigator.of(context).pushReplacement(
+        PageRouteBuilder(
+          transitionDuration: const Duration(milliseconds: 700),
+          pageBuilder: (_, __, ___) => shown
+              ? const DashboardScreen()
+              : const OnboardingScreen(),
+          transitionsBuilder: (_, anim, __, child) =>
+              FadeTransition(opacity: anim, child: child),
+        ),
+      );
     });
   }
 

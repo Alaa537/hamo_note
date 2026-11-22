@@ -22,7 +22,7 @@ class _MerchantScreenState extends State<MerchantScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        backgroundColor: AppColors.card,
+        backgroundColor: context.appCard,
         title: Text(type == TxType.credit ? 'إيداع / دخل' : 'مصروف / سحب'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -75,9 +75,9 @@ class _MerchantScreenState extends State<MerchantScreen> {
         children: [
           GlassCard(
             gradient: LinearGradient(
-              colors: [AppColors.gold.withOpacity(0.25), AppColors.card],
+              colors: [context.appGold.withOpacity(0.25), context.appCard],
             ),
-            borderColor: AppColors.gold.withOpacity(0.4),
+            borderColor: context.appGold.withOpacity(0.4),
             padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -85,20 +85,20 @@ class _MerchantScreenState extends State<MerchantScreen> {
                 const Row(
                   children: [
                     Icon(Icons.storefront_rounded,
-                        color: AppColors.gold, size: 22),
+                        color: context.appGold, size: 22),
                     SizedBox(width: 8),
                     Text('رصيد التاجر',
                         style: TextStyle(
-                            color: AppColors.textDim, fontSize: 13)),
+                            color: context.appTextDim, fontSize: 13)),
                   ],
                 ),
                 const SizedBox(height: 10),
                 Text(
                   '${_fmt(p.merchantBalance.abs())} ج.م',
-                  style: const TextStyle(
+                  style: TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.w900,
-                      color: AppColors.gold),
+                      color: context.appGold),
                 ),
               ],
             ),
@@ -120,7 +120,7 @@ class _MerchantScreenState extends State<MerchantScreen> {
                   icon: const Icon(Icons.remove_rounded),
                   label: const Text('مصروف'),
                   style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.red.withOpacity(0.85),
+                      backgroundColor: context.appRed.withOpacity(0.85),
                       foregroundColor: Colors.white),
                 ),
               ),
@@ -135,10 +135,10 @@ class _MerchantScreenState extends State<MerchantScreen> {
               child: Column(
                 children: const [
                   Icon(Icons.receipt_long_outlined,
-                      color: AppColors.textDim, size: 40),
+                      color: context.appTextDim, size: 40),
                   SizedBox(height: 8),
                   Text('لا توجد حركات',
-                      style: TextStyle(color: AppColors.textDim)),
+                      style: TextStyle(color: context.appTextDim)),
                 ],
               ),
             )
@@ -154,7 +154,7 @@ class _MerchantScreenState extends State<MerchantScreen> {
                       isCredit
                           ? Icons.add_circle_rounded
                           : Icons.remove_circle_rounded,
-                      color: isCredit ? AppColors.green : AppColors.red,
+                      color: isCredit ? context.appGreen : context.appRed,
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -162,21 +162,21 @@ class _MerchantScreenState extends State<MerchantScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('${_fmt(t.amount)} ج.م',
-                              style: const TextStyle(
+                              style: TextStyle(
                                   fontWeight: FontWeight.w700)),
                           Text(_date(t.date),
                               style: const TextStyle(
-                                  color: AppColors.textDim, fontSize: 11)),
+                                  color: context.appTextDim, fontSize: 11)),
                           if (t.note.isNotEmpty)
                             Text(t.note,
-                                style: const TextStyle(
-                                    color: AppColors.textDim, fontSize: 11)),
+                                style: TextStyle(
+                                    color: context.appTextDim, fontSize: 11)),
                         ],
                       ),
                     ),
                     IconButton(
                       icon: const Icon(Icons.delete_outline,
-                          color: AppColors.textDim, size: 20),
+                          color: context.appTextDim, size: 20),
                       onPressed: () =>
                           context.read<AppProvider>().deleteMerchantTx(t.id),
                     ),

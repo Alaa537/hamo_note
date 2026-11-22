@@ -15,43 +15,94 @@ class AppColors {
   static const border = Color(0xFF1E2A40);
 }
 
+class AppLightColors {
+  static const bg = Color(0xFFF5F7FA);
+  static const bg2 = Color(0xFFEEF2F7);
+  static const card = Color(0xFFFFFFFF);
+  static const cardLight = Color(0xFFF3F6FA);
+  static const green = Color(0xFF00A650);
+  static const greenDark = Color(0xFF00893F);
+  static const gold = Color(0xFFD4A017);
+  static const red = Color(0xFFE53935);
+  static const text = Color(0xFF1A1F2E);
+  static const textDim = Color(0xFF6B7280);
+  static const border = Color(0xFFE3E8EF);
+}
+
+extension AppCtx on BuildContext {
+  bool get isDark => Theme.of(this).brightness == Brightness.dark;
+  Color get appBg => Theme.of(this).scaffoldBackgroundColor;
+  Color get appCard => isDark ? AppColors.card : AppLightColors.card;
+  Color get appCardLight => isDark ? AppColors.cardLight : AppLightColors.cardLight;
+  Color get appText => isDark ? AppColors.text : AppLightColors.text;
+  Color get appTextDim => isDark ? AppColors.textDim : AppLightColors.textDim;
+  Color get appBorder => isDark ? AppColors.border : AppLightColors.border;
+  Color get appGreen => isDark ? AppColors.green : AppLightColors.green;
+  Color get appGreenDark => isDark ? AppColors.greenDark : AppLightColors.greenDark;
+  Color get appRed => isDark ? AppColors.red : AppLightColors.red;
+  Color get appGold => isDark ? AppColors.gold : AppLightColors.gold;
+}
+
 class AppTheme {
-  static ThemeData get dark {
-    final base = ThemeData.dark(useMaterial3: true);
+  static ThemeData _base({
+    required Color bg,
+    required Color card,
+    required Color cardLight,
+    required Color green,
+    required Color greenDark,
+    required Color gold,
+    required Color red,
+    required Color text,
+    required Color textDim,
+    required Color border,
+  }) {
+    final base = ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.dark,
+      scaffoldBackgroundColor: bg,
+    );
     return base.copyWith(
-      scaffoldBackgroundColor: AppColors.bg,
-      colorScheme: const ColorScheme.dark(
-        primary: AppColors.green,
-        secondary: AppColors.gold,
-        surface: AppColors.card,
-        error: AppColors.red,
+      colorScheme: ColorScheme(
+        brightness: Brightness.dark,
+        primary: green,
+        onPrimary: Colors.black,
+        secondary: gold,
+        onSecondary: Colors.black,
+        error: red,
+        onError: Colors.white,
+        surface: card,
+        onSurface: text,
       ),
+      scaffoldBackgroundColor: bg,
+      cardColor: card,
+      canvasColor: bg,
+      dividerColor: border,
       textTheme: GoogleFonts.cairoTextTheme(base.textTheme).apply(
-        bodyColor: AppColors.text,
-        displayColor: AppColors.text,
+        bodyColor: text,
+        displayColor: text,
       ),
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
         titleTextStyle: GoogleFonts.cairo(
-          color: AppColors.text,
+          color: text,
           fontSize: 20,
           fontWeight: FontWeight.w700,
         ),
-        iconTheme: const IconThemeData(color: AppColors.green),
+        iconTheme: IconThemeData(color: green),
       ),
       cardTheme: CardThemeData(
-        color: AppColors.card,
+        color: card,
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: AppColors.border, width: 1),
+          side: BorderSide(color: border, width: 1),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.cardLight,
+        fillColor: cardLight,
         contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
@@ -59,18 +110,18 @@ class AppTheme {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppColors.border, width: 1),
+          borderSide: BorderSide(color: border, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppColors.green, width: 1.5),
+          borderSide: BorderSide(color: green, width: 1.5),
         ),
-        hintStyle: const TextStyle(color: AppColors.textDim),
-        labelStyle: const TextStyle(color: AppColors.textDim),
+        hintStyle: TextStyle(color: textDim),
+        labelStyle: TextStyle(color: textDim),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.green,
+          backgroundColor: green,
           foregroundColor: Colors.black,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -78,11 +129,42 @@ class AppTheme {
           textStyle: GoogleFonts.cairo(fontWeight: FontWeight.w700, fontSize: 16),
         ),
       ),
-      floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: AppColors.green,
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: green,
         foregroundColor: Colors.black,
       ),
-      dividerColor: AppColors.border,
     );
+  }
+
+  static ThemeData get dark {
+    final t = _base(
+      bg: AppColors.bg,
+      card: AppColors.card,
+      cardLight: AppColors.cardLight,
+      green: AppColors.green,
+      greenDark: AppColors.greenDark,
+      gold: AppColors.gold,
+      red: AppColors.red,
+      text: AppColors.text,
+      textDim: AppColors.textDim,
+      border: AppColors.border,
+    );
+    return t.copyWith(brightness: Brightness.dark);
+  }
+
+  static ThemeData get light {
+    final t = _base(
+      bg: AppLightColors.bg,
+      card: AppLightColors.card,
+      cardLight: AppLightColors.cardLight,
+      green: AppLightColors.green,
+      greenDark: AppLightColors.greenDark,
+      gold: AppLightColors.gold,
+      red: AppLightColors.red,
+      text: AppLightColors.text,
+      textDim: AppLightColors.textDim,
+      border: AppLightColors.border,
+    );
+    return t.copyWith(brightness: Brightness.light);
   }
 }

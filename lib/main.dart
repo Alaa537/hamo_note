@@ -13,20 +13,28 @@ void main() async {
     systemNavigationBarColor: AppColors.bg,
     systemNavigationBarIconBrightness: Brightness.light,
   ));
-  runApp(const HamoApp());
+  final provider = AppProvider();
+  await provider.init();
+  runApp(HamoApp(provider: provider));
 }
 
 class HamoApp extends StatelessWidget {
-  const HamoApp({super.key});
+  final AppProvider provider;
+  const HamoApp({super.key, required this.provider});
+
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => AppProvider()..init(),
-      child: MaterialApp(
-        title: 'Hamo Note',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.dark,
-        home: const SplashScreen(),
+    return ChangeNotifierProvider.value(
+      value: provider,
+      child: Consumer<AppProvider>(
+        builder: (context, p, _) => MaterialApp(
+          title: 'Hamo Note',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.light,
+          darkTheme: AppTheme.dark,
+          themeMode: p.themeMode,
+          home: const SplashScreen(),
+        ),
       ),
     );
   }

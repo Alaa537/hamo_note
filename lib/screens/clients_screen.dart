@@ -41,11 +41,11 @@ class _ClientsScreenState extends State<ClientsScreen> {
             padding: const EdgeInsets.all(16),
             child: TextField(
               onChanged: (v) => setState(() => query = v),
-              style: const TextStyle(color: AppColors.text),
+              style: TextStyle(color: context.appText),
               decoration: const InputDecoration(
                 hintText: 'ابحث بالاسم أو الرقم',
                 prefixIcon:
-                    Icon(Icons.search_rounded, color: AppColors.textDim),
+                    Icon(Icons.search_rounded, color: context.appTextDim),
               ),
             ),
           ).animate().fadeIn().slideY(begin: -0.1),
@@ -56,10 +56,10 @@ class _ClientsScreenState extends State<ClientsScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: const [
                         Icon(Icons.people_outline,
-                            color: AppColors.textDim, size: 60),
+                            color: context.appTextDim, size: 60),
                         SizedBox(height: 12),
                         Text('لا يوجد عملاء',
-                            style: TextStyle(color: AppColors.textDim)),
+                            style: TextStyle(color: context.appTextDim)),
                       ],
                     ),
                   )
@@ -89,11 +89,11 @@ class _ClientsScreenState extends State<ClientsScreen> {
                                     CircleAvatar(
                                       radius: 24,
                                       backgroundColor:
-                                          AppColors.green.withOpacity(0.15),
+                                          context.appGreen.withOpacity(0.15),
                                       child: Text(
                                         c.name.isNotEmpty ? c.name[0] : '?',
-                                        style: const TextStyle(
-                                            color: AppColors.green,
+                                        style: TextStyle(
+                                            color: context.appGreen,
                                             fontWeight: FontWeight.w800,
                                             fontSize: 20),
                                       ),
@@ -105,7 +105,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
                                             CrossAxisAlignment.start,
                                         children: [
                                           Text(c.name,
-                                              style: const TextStyle(
+                                              style: TextStyle(
                                                   fontWeight:
                                                       FontWeight.w700,
                                                   fontSize: 15)),
@@ -113,7 +113,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
                                           Text(c.phone,
                                               style: const TextStyle(
                                                   fontSize: 12,
-                                                  color: AppColors.textDim)),
+                                                  color: context.appTextDim)),
                                         ],
                                       ),
                                     ),
@@ -125,8 +125,8 @@ class _ClientsScreenState extends State<ClientsScreen> {
                                           '${_fmt(c.balance.abs())} ج.م',
                                           style: TextStyle(
                                             color: c.balance >= 0
-                                                ? AppColors.green
-                                                : AppColors.red,
+                                                ? context.appGreen
+                                                : context.appRed,
                                             fontWeight: FontWeight.w800,
                                             fontSize: 14,
                                           ),
@@ -136,8 +136,8 @@ class _ClientsScreenState extends State<ClientsScreen> {
                                           style: TextStyle(
                                               fontSize: 10,
                                               color: c.balance >= 0
-                                                  ? AppColors.green
-                                                  : AppColors.red),
+                                                  ? context.appGreen
+                                                  : context.appRed),
                                         ),
                                       ],
                                     ),

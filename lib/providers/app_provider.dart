@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/client.dart';
 import '../models/transaction.dart';
 import '../services/storage_service.dart';
@@ -9,6 +10,8 @@ class AppProvider extends ChangeNotifier {
   List<Client> clients = [];
   List<Transaction> merchantTx = [];
   String merchantName = 'Hamo';
+  ThemeMode themeMode = ThemeMode.dark;
+  bool onboardingShown = false;
   bool loading = true;
 
   double get totalCredit => clients
@@ -31,11 +34,32 @@ class AppProvider extends ChangeNotifier {
     clients = await _storage.loadClients();
     merchantTx = await _storage.loadMerchantTx();
     merchantName = await _storage.loadMerchantName();
+    final sp = await SharedPreferences.getInstance();
+    final modeStr = sp.getString('hmn_theme_mode') ?? 'dark';
+    themeMode = ThemeMode.values.firstWhere(
+      (m) => m.name == modeStr,
+      orElse: () => ThemeMode.dark,
+    );
+    onboardingShown = sp.getBool('hmn_onboarding_shown') ?? false;
     loading = false;
     notifyListeners();
   }
 
   String _uid() => DateTime.now().microsecondsSinceEpoch.toString();
+
+  Future<void> setThemeMode(ThemeMode mode) async {
+    themeMode = mode;
+    final sp = await SharedPreferences.getInstance();
+    await sp.setString('hmn_theme_mode', mode.name);
+    notifyListeners();
+  }
+
+  Future<void> setOnboardingShown(bool v) async {
+    onboardingShown = v;
+    final sp = await SharedPreferences.getInstance();
+    await sp.setBool('hmn_onboarding_shown', v);
+    notifyListeners();
+  }
 
   Future<void> addClient({
     required String name,
@@ -109,6 +133,8 @@ class AppProvider extends ChangeNotifier {
     clients = [];
     merchantTx = [];
     merchantName = 'Hamo';
+    themeMode = ThemeMode.dark;
+    onboardingShown = false;
     notifyListeners();
   }
 }
