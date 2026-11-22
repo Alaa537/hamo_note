@@ -42,7 +42,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
             child: TextField(
               onChanged: (v) => setState(() => query = v),
               style: TextStyle(color: context.appText),
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: 'ابحث بالاسم أو الرقم',
                 prefixIcon:
                     Icon(Icons.search_rounded, color: context.appTextDim),
@@ -54,7 +54,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
                 ? Center(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
-                      children: const [
+                      children: [
                         Icon(Icons.people_outline,
                             color: context.appTextDim, size: 60),
                         SizedBox(height: 12),
@@ -111,7 +111,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
                                                   fontSize: 15)),
                                           const SizedBox(height: 2),
                                           Text(c.phone,
-                                              style: const TextStyle(
+                                              style: TextStyle(
                                                   fontSize: 12,
                                                   color: context.appTextDim)),
                                         ],

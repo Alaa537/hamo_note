@@ -34,7 +34,7 @@ class DashboardScreen extends StatelessWidget {
                     width: 52,
                     height: 52,
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
+                      gradient: LinearGradient(
                         colors: [context.appGreen, context.appGreenDark],
                       ),
                       borderRadius: BorderRadius.circular(16),
@@ -61,7 +61,7 @@ class DashboardScreen extends StatelessWidget {
                         Text('أهلاً، ${p.merchantName}',
                             style: TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.w700)),
-                        const Text('نظرة سريعة على أعمالك',
+                        Text('نظرة سريعة على أعمالك',
                             style: TextStyle(
                                 color: context.appTextDim, fontSize: 12)),
                       ],
@@ -72,7 +72,7 @@ class DashboardScreen extends StatelessWidget {
                       context,
                       MaterialPageRoute(builder: (_) => const SettingsScreen()),
                     ),
-                    icon: const Icon(Icons.settings_rounded,
+                    icon: Icon(Icons.settings_rounded,
                         color: context.appText),
                   ),
                 ],
@@ -95,7 +95,7 @@ class DashboardScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Row(
+                    Row(
                       children: [
                         Icon(Icons.account_balance_wallet_rounded,
                             color: context.appGreen, size: 22),
@@ -172,7 +172,7 @@ class DashboardScreen extends StatelessWidget {
                         color: context.appGold.withOpacity(0.15),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Icon(Icons.storefront_rounded,
+                      child: Icon(Icons.storefront_rounded,
                           color: context.appGold, size: 26),
                     ),
                     const SizedBox(width: 14),
@@ -196,7 +196,7 @@ class DashboardScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const Icon(Icons.chevron_left,
+                    Icon(Icons.chevron_left,
                         color: context.appTextDim),
                   ],
                 ),
@@ -236,7 +236,7 @@ class DashboardScreen extends StatelessWidget {
               if (p.clients.isEmpty)
                 GlassCard(
                   child: Column(
-                    children: const [
+                    children: [
                       Icon(Icons.person_add_alt_1_rounded,
                           color: context.appTextDim, size: 40),
                       SizedBox(height: 8),
@@ -278,7 +278,7 @@ class DashboardScreen extends StatelessWidget {
                                   style: TextStyle(
                                       fontWeight: FontWeight.w700)),
                               Text('${c.category.emoji} ${c.category.arName}',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                       fontSize: 11,
                                       color: context.appTextDim)),
                             ],

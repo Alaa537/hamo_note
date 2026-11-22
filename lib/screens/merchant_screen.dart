@@ -82,7 +82,7 @@ class _MerchantScreenState extends State<MerchantScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Row(
+                Row(
                   children: [
                     Icon(Icons.storefront_rounded,
                         color: context.appGold, size: 22),
@@ -133,7 +133,7 @@ class _MerchantScreenState extends State<MerchantScreen> {
           if (tx.isEmpty)
             GlassCard(
               child: Column(
-                children: const [
+                children: [
                   Icon(Icons.receipt_long_outlined,
                       color: context.appTextDim, size: 40),
                   SizedBox(height: 8),
@@ -165,7 +165,7 @@ class _MerchantScreenState extends State<MerchantScreen> {
                               style: TextStyle(
                                   fontWeight: FontWeight.w700)),
                           Text(_date(t.date),
-                              style: const TextStyle(
+                              style: TextStyle(
                                   color: context.appTextDim, fontSize: 11)),
                           if (t.note.isNotEmpty)
                             Text(t.note,
@@ -175,7 +175,7 @@ class _MerchantScreenState extends State<MerchantScreen> {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.delete_outline,
+                      icon: Icon(Icons.delete_outline,
                           color: context.appTextDim, size: 20),
                       onPressed: () =>
                           context.read<AppProvider>().deleteMerchantTx(t.id),
