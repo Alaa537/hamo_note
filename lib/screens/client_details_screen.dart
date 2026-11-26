@@ -10,6 +10,10 @@ import '../models/client.dart';
 import '../services/pdf_service.dart';
 import 'add_transaction_screen.dart';
 import 'edit_client_screen.dart';
+import 'dart:typed_data';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:signature/signature.dart';
 
 class ClientDetailsScreen extends StatelessWidget {
   final String clientId;
