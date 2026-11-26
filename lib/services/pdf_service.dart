@@ -330,6 +330,29 @@ class PdfService {
   }
 
 
+
+  static Future<void> shareStatement({
+    required Client client,
+    required String merchantName,
+    String merchantPhone = '',
+    String merchantAddress = '',
+  }) async {
+    final bytes = await buildStatement(
+      client: client,
+      merchantName: merchantName,
+      merchantPhone: merchantPhone,
+      merchantAddress: merchantAddress,
+    );
+    if (bytes.isEmpty) {
+      throw Exception('ملف كشف الحساب فاضي');
+    }
+    await Printing.sharePdf(
+      bytes: bytes,
+      filename:
+          'HamoNote_Statement_${client.name}_${DateTime.now().millisecondsSinceEpoch}.pdf',
+    );
+  }
+
   // ───────────────────────── Receipt (وصل) ─────────────────────────
   static const String fixedSignature = 'Mohamed Rabea';
 
