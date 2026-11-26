@@ -7,7 +7,6 @@ import 'package:printing/printing.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:pdfx/pdfx.dart' as pdfx;
 import '../models/client.dart';
 import '../models/transaction.dart';
 
@@ -353,10 +352,10 @@ class PdfService {
     final receiptNo =
         'R-${transaction.id.length > 6 ? transaction.id.substring(transaction.id.length - 6) : transaction.id}';
 
-    // Use a wider thermal-like page that prints reliably
+    // Fixed thermal-like size (pdfx/raster cannot handle infinite height)
     final pageFormat = PdfPageFormat(
       80 * PdfPageFormat.mm,
-      double.infinity,
+      200 * PdfPageFormat.mm,
       marginAll: 6 * PdfPageFormat.mm,
     );
 
@@ -366,6 +365,7 @@ class PdfService {
       textDirection: pw.TextDirection.rtl,
       build: (ctx) => pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+        mainAxisSize: pw.MainAxisSize.min,
         children: [
           // Logo + brand
           pw.Center(
@@ -594,6 +594,7 @@ class PdfService {
   }
 
   /// Convert first page of PDF to high-quality PNG and share as image.
+  /// Uses printing.raster (stable) instead of pdfx to avoid null/infinite-page crashes.
   static Future<void> sharePdfAsImage({
     required Uint8List pdfBytes,
     required String filename,
@@ -601,35 +602,30 @@ class PdfService {
   }) async {
     final tempDir = await getTemporaryDirectory();
     final safeName = filename.replaceAll(RegExp(r'[^\w\-]+'), '_');
-    final pdfFile = File('${tempDir.path}/temp_$safeName.pdf');
-    await pdfFile.writeAsBytes(pdfBytes);
+    final imageFile = File('${tempDir.path}/$safeName.png');
 
     try {
-      final document = await pdfx.PdfDocument.openFile(pdfFile.path);
-      final page = await document.getPage(1);
-      // High resolution for clear Arabic text
-      final pageImage = await page.render(
-        width: page.width * 3.5,
-        height: page.height * 3.5,
-        format: pdfx.PdfPageImageFormat.png,
-      );
-      await page.close();
-      await document.close();
-
-      if (pageImage != null && pageImage.bytes.isNotEmpty) {
-        final imageFile = File('${tempDir.path}/$safeName.png');
-        await imageFile.writeAsBytes(pageImage.bytes);
-        await Share.shareXFiles(
-          [XFile(imageFile.path)],
-          text: shareText,
-        );
-        try {
-          await imageFile.delete();
-        } catch (_) {}
+      // Rasterize first page at ~200 DPI
+      await for (final page in Printing.raster(pdfBytes, pages: [0], dpi: 200)) {
+        final pngBytes = await page.toPng();
+        if (pngBytes.isEmpty) {
+          throw Exception('فشل تحويل الوصل إلى صورة');
+        }
+        await imageFile.writeAsBytes(pngBytes);
+        break; // only first page
       }
+
+      if (!await imageFile.exists()) {
+        throw Exception('لم يتم إنشاء صورة الوصل');
+      }
+
+      await Share.shareXFiles(
+        [XFile(imageFile.path)],
+        text: shareText,
+      );
     } finally {
       try {
-        await pdfFile.delete();
+        if (await imageFile.exists()) await imageFile.delete();
       } catch (_) {}
     }
   }
