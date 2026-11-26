@@ -40,7 +40,7 @@ class _SplashScreenState extends State<SplashScreen>
       final p = context.read<AppProvider>();
       final Widget next;
       if (p.pinEnabled && p.pinCode != null) {
-        next = const _PinLockScreen();
+        next = _PinLockScreen();
       } else if (p.onboardingShown) {
         next = const DashboardScreen();
       } else {
@@ -234,3 +234,162 @@ class _DotsPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
+
+
+class _PinLockScreen extends StatefulWidget {
+  const _PinLockScreen();
+  @override
+  State<_PinLockScreen> createState() => _PinLockScreenState();
+}
+
+class _PinLockScreenState extends State<_PinLockScreen> {
+  String _input = '';
+  String? _error;
+
+  void _onDigit(String d) {
+    if (_input.length >= 6) return;
+    setState(() {
+      _input += d;
+      _error = null;
+    });
+    final p = context.read<AppProvider>();
+    final needed = p.pinCode?.length ?? 4;
+    if (_input.length >= needed) {
+      if (p.verifyPin(_input)) {
+        final shown = p.onboardingShown;
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) =>
+                shown ? const DashboardScreen() : const OnboardingScreen(),
+          ),
+        );
+      } else {
+        setState(() {
+          _error = 'رقم سري خاطئ';
+          _input = '';
+        });
+      }
+    }
+  }
+
+  void _backspace() {
+    if (_input.isEmpty) return;
+    setState(() => _input = _input.substring(0, _input.length - 1));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.watch<AppProvider>();
+    return Scaffold(
+      backgroundColor: AppColors.bg,
+      body: SafeArea(
+        child: Column(
+          children: [
+            const Spacer(),
+            Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                color: AppColors.gold,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.gold.withOpacity(0.4),
+                    blurRadius: 24,
+                  ),
+                ],
+              ),
+              child: const Center(
+                child: Text(
+                  'H',
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'أهلاً، ${p.merchantName}',
+              style: const TextStyle(
+                color: AppColors.text,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'أدخل الرقم السري',
+              style: TextStyle(color: AppColors.textDim, fontSize: 13),
+            ),
+            const SizedBox(height: 28),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(6, (i) {
+                final filled = i < _input.length;
+                return Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 6),
+                  width: 14,
+                  height: 14,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: filled ? AppColors.gold : Colors.transparent,
+                    border: Border.all(color: AppColors.gold, width: 1.5),
+                  ),
+                );
+              }),
+            ),
+            if (_error != null) ...[
+              const SizedBox(height: 12),
+              Text(
+                _error!,
+                style: const TextStyle(color: AppColors.red, fontSize: 13),
+              ),
+            ],
+            const Spacer(),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40),
+              child: GridView.count(
+                shrinkWrap: true,
+                crossAxisCount: 3,
+                childAspectRatio: 1.4,
+                physics: const NeverScrollableScrollPhysics(),
+                children: [
+                  for (final d in [
+                    '1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', '⌫'
+                  ])
+                    d.isEmpty
+                        ? const SizedBox.shrink()
+                        : InkWell(
+                            borderRadius: BorderRadius.circular(40),
+                            onTap: () {
+                              if (d == '⌫') {
+                                _backspace();
+                              } else {
+                                _onDigit(d);
+                              }
+                            },
+                            child: Center(
+                              child: Text(
+                                d,
+                                style: const TextStyle(
+                                  color: AppColors.text,
+                                  fontSize: 26,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 40),
+          ],
+        ),
+      ),
+    );
+  }
+}
+

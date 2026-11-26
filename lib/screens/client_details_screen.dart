@@ -1,19 +1,19 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../models/client.dart';
+import '../models/transaction.dart';
 import '../providers/app_provider.dart';
+import '../services/pdf_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/glass_card.dart';
-import '../models/transaction.dart';
-import '../models/client.dart';
-import '../services/pdf_service.dart';
+import '../widgets/signature_pad.dart';
 import 'add_transaction_screen.dart';
 import 'edit_client_screen.dart';
-import 'dart:typed_data';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:signature/signature.dart';
 
 class ClientDetailsScreen extends StatelessWidget {
   final String clientId;

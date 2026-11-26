@@ -497,4 +497,125 @@ class SettingsScreen extends StatelessWidget {
     if (ok == true) await p.setMerchantAddress(ctrl.text.trim());
   }
 
+
+  Future<void> _setupPin(BuildContext context, AppProvider p) async {
+    final ctrl = TextEditingController();
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: context.appCard,
+        title: Text('تعيين رقم سري (4-6 أرقام)',
+            style: TextStyle(color: context.appText, fontSize: 16)),
+        content: TextField(
+          controller: ctrl,
+          keyboardType: TextInputType.number,
+          obscureText: true,
+          maxLength: 6,
+          style: TextStyle(color: context.appText),
+          decoration: const InputDecoration(hintText: '••••'),
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('إلغاء')),
+          ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('حفظ')),
+        ],
+      ),
+    );
+    if (ok == true) {
+      final pin = ctrl.text.trim();
+      if (pin.length >= 4 && pin.length <= 6 && int.tryParse(pin) != null) {
+        await p.setPin(pin, enabled: true);
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('تم تفعيل القفل')),
+          );
+        }
+      } else if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('الرقم السري يجب أن يكون 4-6 أرقام')),
+        );
+      }
+    }
+  }
+
+  Future<void> _restoreBackup(BuildContext context, AppProvider p) async {
+    final ctrl = TextEditingController();
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: context.appCard,
+        title: Text('استعادة النسخة',
+            style: TextStyle(color: context.appText)),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: TextField(
+            controller: ctrl,
+            maxLines: 8,
+            style: TextStyle(color: context.appText, fontSize: 12),
+            decoration: const InputDecoration(
+              hintText: 'الصق محتوى ملف JSON هنا',
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('إلغاء')),
+          ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('استعادة')),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    try {
+      final payload = BackupService.parse(ctrl.text.trim());
+      final confirm = await showDialog<bool>(
+        context: context,
+        builder: (_) => AlertDialog(
+          backgroundColor: context.appCard,
+          title: Text('تأكيد الاستعادة',
+              style: TextStyle(color: context.appText)),
+          content: Text(
+            'سيتم استبدال كل البيانات الحالية.\n'
+            'عملاء: ${payload.clients.length} — ملاحظات: ${payload.notes.length}',
+            style: TextStyle(color: context.appTextDim),
+          ),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('إلغاء')),
+            ElevatedButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('استعادة')),
+          ],
+        ),
+      );
+      if (confirm == true) {
+        await p.restoreBackup(
+          merchantName: payload.merchantName,
+          merchantPhone: payload.merchantPhone,
+          merchantAddress: payload.merchantAddress,
+          clients: payload.clients,
+          merchantTx: payload.merchantTx,
+          notes: payload.notes,
+        );
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('تمت الاستعادة بنجاح')),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('ملف غير صالح: $e')),
+        );
+      }
+    }
+  }
+
 }
