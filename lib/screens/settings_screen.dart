@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/glass_card.dart';
+import '../services/backup_service.dart';
+import 'reports_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -49,35 +51,112 @@ class SettingsScreen extends StatelessWidget {
           _header(context, Icons.person_rounded, 'بيانات التاجر'),
           const SizedBox(height: 10),
           GlassCard(
-            child: Row(
+            child: Column(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: context.appGreen.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(Icons.store_rounded, color: context.appGreen),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: context.appGold.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(Icons.store_rounded, color: context.appGold),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('اسم التاجر',
+                              style: TextStyle(
+                                  color: context.appTextDim, fontSize: 11)),
+                          Text(p.merchantName,
+                              style: TextStyle(
+                                  color: context.appText,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700)),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.edit_rounded, color: context.appGold),
+                      onPressed: () => _editName(context, p),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('اسم التاجر',
-                          style: TextStyle(
-                              color: context.appTextDim, fontSize: 11)),
-                      Text(p.merchantName,
-                          style: TextStyle(
-                              color: context.appText,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700)),
-                    ],
-                  ),
+                const Divider(height: 20),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: context.appGreen.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(Icons.phone_rounded, color: context.appGreen),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('هاتف التاجر',
+                              style: TextStyle(
+                                  color: context.appTextDim, fontSize: 11)),
+                          Text(
+                              p.merchantPhone.isEmpty
+                                  ? 'غير محدد'
+                                  : p.merchantPhone,
+                              style: TextStyle(
+                                  color: context.appText,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700)),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.edit_rounded, color: context.appGreen),
+                      onPressed: () => _editPhone(context, p),
+                    ),
+                  ],
                 ),
-                IconButton(
-                  icon: Icon(Icons.edit_rounded, color: context.appGreen),
-                  onPressed: () => _editName(context, p),
+                const Divider(height: 20),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: context.appGold.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child:
+                          Icon(Icons.location_on_rounded, color: context.appGold),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('العنوان',
+                              style: TextStyle(
+                                  color: context.appTextDim, fontSize: 11)),
+                          Text(
+                              p.merchantAddress.isEmpty
+                                  ? 'غير محدد'
+                                  : p.merchantAddress,
+                              style: TextStyle(
+                                  color: context.appText,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700)),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.edit_rounded, color: context.appGold),
+                      onPressed: () => _editAddress(context, p),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -131,6 +210,118 @@ class SettingsScreen extends StatelessWidget {
                       'إجمالي المعاملات',
                       '${p.clients.fold<int>(0, (s, c) => s + c.transactions.length)}',
                       Icons.receipt_rounded),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          _header(context, Icons.analytics_rounded, 'التقارير'),
+          const SizedBox(height: 10),
+          GlassCard(
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const ReportsScreen()),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: context.appGold.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(Icons.bar_chart_rounded, color: context.appGold),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('التقارير والإحصائيات',
+                          style: TextStyle(
+                              color: context.appText,
+                              fontWeight: FontWeight.w700)),
+                      Text('ملخص الشهر، الديون المتأخرة، التوزيع',
+                          style: TextStyle(
+                              color: context.appTextDim, fontSize: 11)),
+                    ],
+                  ),
+                ),
+                Icon(Icons.chevron_left_rounded, color: context.appTextDim),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          _header(context, Icons.security_rounded, 'الأمان والنسخ الاحتياطي'),
+          const SizedBox(height: 10),
+          GlassCard(
+            child: Column(
+              children: [
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text('قفل برقم سري',
+                      style: TextStyle(
+                          color: context.appText, fontWeight: FontWeight.w600)),
+                  subtitle: Text(
+                    p.pinEnabled ? 'مفعّل' : 'عند فتح التطبيق',
+                    style: TextStyle(color: context.appTextDim, fontSize: 11),
+                  ),
+                  value: p.pinEnabled,
+                  activeColor: context.appGold,
+                  onChanged: (v) async {
+                    if (v) {
+                      await _setupPin(context, p);
+                    } else {
+                      await p.setPin(null);
+                    }
+                  },
+                ),
+                if (p.pinEnabled) ...[
+                  const Divider(height: 12),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(Icons.password_rounded, color: context.appGold),
+                    title: Text('تغيير الرقم السري',
+                        style: TextStyle(color: context.appText)),
+                    onTap: () => _setupPin(context, p),
+                  ),
+                ],
+                const Divider(height: 12),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(Icons.backup_rounded, color: context.appGreen),
+                  title: Text('تصدير نسخة احتياطية',
+                      style: TextStyle(color: context.appText)),
+                  subtitle: Text('ملف JSON تقدر تحفظه أو تبعته',
+                      style: TextStyle(color: context.appTextDim, fontSize: 11)),
+                  onTap: () async {
+                    try {
+                      await BackupService.shareBackup(
+                        merchantName: p.merchantName,
+                        merchantPhone: p.merchantPhone,
+                        merchantAddress: p.merchantAddress,
+                        clients: p.clients,
+                        merchantTx: p.merchantTx,
+                        notes: p.notes,
+                      );
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('فشل التصدير: $e')),
+                        );
+                      }
+                    }
+                  },
+                ),
+                const Divider(height: 12),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(Icons.restore_rounded, color: context.appGold),
+                  title: Text('استعادة من نص JSON',
+                      style: TextStyle(color: context.appText)),
+                  subtitle: Text('الصق محتوى ملف النسخة الاحتياطية',
+                      style: TextStyle(color: context.appTextDim, fontSize: 11)),
+                  onTap: () => _restoreBackup(context, p),
                 ),
               ],
             ),
@@ -262,4 +453,48 @@ class SettingsScreen extends StatelessWidget {
       if (context.mounted) Navigator.pop(context);
     }
   }
+
+  Future<void> _editPhone(BuildContext context, AppProvider p) async {
+    final ctrl = TextEditingController(text: p.merchantPhone);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: context.appCard,
+        title: Text('هاتف التاجر', style: TextStyle(color: context.appText)),
+        content: TextField(
+          controller: ctrl,
+          keyboardType: TextInputType.phone,
+          style: TextStyle(color: context.appText),
+          decoration: const InputDecoration(hintText: '01xxxxxxxxx'),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('إلغاء')),
+          ElevatedButton(onPressed: () => Navigator.pop(context, true), child: const Text('حفظ')),
+        ],
+      ),
+    );
+    if (ok == true) await p.setMerchantPhone(ctrl.text.trim());
+  }
+
+  Future<void> _editAddress(BuildContext context, AppProvider p) async {
+    final ctrl = TextEditingController(text: p.merchantAddress);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: context.appCard,
+        title: Text('عنوان التاجر', style: TextStyle(color: context.appText)),
+        content: TextField(
+          controller: ctrl,
+          style: TextStyle(color: context.appText),
+          decoration: const InputDecoration(hintText: 'العنوان / المنطقة'),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('إلغاء')),
+          ElevatedButton(onPressed: () => Navigator.pop(context, true), child: const Text('حفظ')),
+        ],
+      ),
+    );
+    if (ok == true) await p.setMerchantAddress(ctrl.text.trim());
+  }
+
 }

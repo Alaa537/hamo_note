@@ -37,13 +37,19 @@ class _SplashScreenState extends State<SplashScreen>
     });
     Timer(const Duration(milliseconds: 3800), () {
       if (!mounted) return;
-      final shown = context.read<AppProvider>().onboardingShown;
+      final p = context.read<AppProvider>();
+      final Widget next;
+      if (p.pinEnabled && p.pinCode != null) {
+        next = const _PinLockScreen();
+      } else if (p.onboardingShown) {
+        next = const DashboardScreen();
+      } else {
+        next = const OnboardingScreen();
+      }
       Navigator.of(context).pushReplacement(
         PageRouteBuilder(
           transitionDuration: const Duration(milliseconds: 700),
-          pageBuilder: (_, __, ___) => shown
-              ? const DashboardScreen()
-              : const OnboardingScreen(),
+          pageBuilder: (_, __, ___) => next,
           transitionsBuilder: (_, anim, __, child) =>
               FadeTransition(opacity: anim, child: child),
         ),

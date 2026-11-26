@@ -34,8 +34,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       icon: Icons.picture_as_pdf_rounded,
       title: 'اطبع وشارك بضغطة',
       subtitle:
-          'اعمل كشف حساب احترافي PDF أو وصل حراري 80mm وشاركه مع عميلك على واتساب فورًا.',
+          'وصل كامل التفاصيل: اليوم، التاريخ، اسم العميل، المبلغ، الرصيد والتوقيع — شاركه PDF أو صورة احترافية.',
       color: Color(0xFF2196F3),
+    ),
+    _OnboardData(
+      icon: Icons.sticky_note_2_rounded,
+      title: 'ملاحظاتك الخاصة',
+      subtitle:
+          'دفتر ملاحظات شخصي داخل التطبيق — ثبّت المهم ولوّن البطاقات حسب الأولوية.',
+      color: Color(0xFFFBBF24),
     ),
     _OnboardData(
       icon: Icons.verified_rounded,

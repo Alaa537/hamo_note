@@ -10,6 +10,8 @@ import 'clients_screen.dart';
 import 'settings_screen.dart';
 import 'merchant_screen.dart';
 import 'add_client_screen.dart';
+import 'notes_screen.dart';
+import 'reports_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -242,19 +244,51 @@ class DashboardScreen extends StatelessWidget {
                   Expanded(
                     child: _quickActionButton(
                       context,
-                      icon: Icons.picture_as_pdf_rounded,
-                      label: 'التقارير',
+                      icon: Icons.sticky_note_2_rounded,
+                      label: 'ملاحظاتي',
                       color: context.appGold,
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('شاشة التقارير هتتوفر قريباً')),
-                        );
-                      },
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => const NotesScreen()),
+                      ),
                     ),
                   ),
                 ],
               ).animate().fadeIn(delay: 350.ms).slideY(begin: 0.1),
+
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: _quickActionButton(
+                      context,
+                      icon: Icons.bar_chart_rounded,
+                      label: 'التقارير',
+                      color: context.appGold,
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => const ReportsScreen()),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _quickActionButton(
+                      context,
+                      icon: Icons.account_balance_wallet_rounded,
+                      label: 'خزنة التاجر',
+                      color: context.appGreen,
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => const MerchantScreen()),
+                      ),
+                    ),
+                  ),
+                ],
+              ).animate().fadeIn(delay: 380.ms).slideY(begin: 0.1),
 
               const SizedBox(height: 28),
 

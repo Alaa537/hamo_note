@@ -1,50 +1,61 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+/// Professional palette: deep navy + white + gold/yellow accents
 class AppColors {
-  static const bg = Color(0xFF0A0E1A);
-  static const bg2 = Color(0xFF0E1524);
-  static const card = Color(0xFF141C2E);
-  static const cardLight = Color(0xFF1A2332);
-  static const green = Color(0xFF00E676);
-  static const greenDark = Color(0xFF00C853);
-  static const gold = Color(0xFFFFD54F);
-  static const red = Color(0xFFFF5252);
-  static const text = Color(0xFFF5F7FA);
-  static const textDim = Color(0xFF8A93A8);
-  static const border = Color(0xFF1E2A40);
+  static const bg = Color(0xFF0B0F1A);
+  static const bg2 = Color(0xFF111827);
+  static const card = Color(0xFF151C2C);
+  static const cardLight = Color(0xFF1C2538);
+  static const green = Color(0xFF22C55E);
+  static const greenDark = Color(0xFF16A34A);
+  static const gold = Color(0xFFFBBF24); // primary yellow/gold
+  static const goldSoft = Color(0xFFFDE68A);
+  static const red = Color(0xFFEF4444);
+  static const text = Color(0xFFF8FAFC);
+  static const textDim = Color(0xFF94A3B8);
+  static const border = Color(0xFF243044);
+  static const white = Color(0xFFFFFFFF);
 }
 
 class AppLightColors {
-  static const bg = Color(0xFFF5F7FA);
-  static const bg2 = Color(0xFFEEF2F7);
+  static const bg = Color(0xFFF8FAFC);
+  static const bg2 = Color(0xFFF1F5F9);
   static const card = Color(0xFFFFFFFF);
-  static const cardLight = Color(0xFFF3F6FA);
-  static const green = Color(0xFF00A650);
-  static const greenDark = Color(0xFF00893F);
-  static const gold = Color(0xFFD4A017);
-  static const red = Color(0xFFE53935);
-  static const text = Color(0xFF1A1F2E);
-  static const textDim = Color(0xFF6B7280);
-  static const border = Color(0xFFE3E8EF);
+  static const cardLight = Color(0xFFF8FAFC);
+  static const green = Color(0xFF16A34A);
+  static const greenDark = Color(0xFF15803D);
+  static const gold = Color(0xFFD97706); // warm professional gold
+  static const goldSoft = Color(0xFFFEF3C7);
+  static const red = Color(0xFFDC2626);
+  static const text = Color(0xFF0F172A);
+  static const textDim = Color(0xFF64748B);
+  static const border = Color(0xFFE2E8F0);
+  static const white = Color(0xFFFFFFFF);
 }
 
 extension AppCtx on BuildContext {
   bool get isDark => Theme.of(this).brightness == Brightness.dark;
   Color get appBg => Theme.of(this).scaffoldBackgroundColor;
   Color get appCard => isDark ? AppColors.card : AppLightColors.card;
-  Color get appCardLight => isDark ? AppColors.cardLight : AppLightColors.cardLight;
+  Color get appCardLight =>
+      isDark ? AppColors.cardLight : AppLightColors.cardLight;
   Color get appText => isDark ? AppColors.text : AppLightColors.text;
   Color get appTextDim => isDark ? AppColors.textDim : AppLightColors.textDim;
   Color get appBorder => isDark ? AppColors.border : AppLightColors.border;
   Color get appGreen => isDark ? AppColors.green : AppLightColors.green;
-  Color get appGreenDark => isDark ? AppColors.greenDark : AppLightColors.greenDark;
+  Color get appGreenDark =>
+      isDark ? AppColors.greenDark : AppLightColors.greenDark;
   Color get appRed => isDark ? AppColors.red : AppLightColors.red;
   Color get appGold => isDark ? AppColors.gold : AppLightColors.gold;
+  Color get appGoldSoft =>
+      isDark ? AppColors.goldSoft : AppLightColors.goldSoft;
+  Color get appWhite => AppColors.white;
 }
 
 class AppTheme {
   static ThemeData _base({
+    required Brightness brightness,
     required Color bg,
     required Color card,
     required Color cardLight,
@@ -58,15 +69,15 @@ class AppTheme {
   }) {
     final base = ThemeData(
       useMaterial3: true,
-      brightness: Brightness.dark,
+      brightness: brightness,
       scaffoldBackgroundColor: bg,
     );
     return base.copyWith(
       colorScheme: ColorScheme(
-        brightness: Brightness.dark,
-        primary: green,
+        brightness: brightness,
+        primary: gold,
         onPrimary: Colors.black,
-        secondary: gold,
+        secondary: green,
         onSecondary: Colors.black,
         error: red,
         onError: Colors.white,
@@ -90,7 +101,7 @@ class AppTheme {
           fontSize: 20,
           fontWeight: FontWeight.w700,
         ),
-        iconTheme: IconThemeData(color: green),
+        iconTheme: IconThemeData(color: gold),
       ),
       cardTheme: CardThemeData(
         color: card,
@@ -103,7 +114,8 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: cardLight,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide.none,
@@ -114,30 +126,39 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: green, width: 1.5),
+          borderSide: BorderSide(color: gold, width: 1.5),
         ),
         hintStyle: TextStyle(color: textDim),
         labelStyle: TextStyle(color: textDim),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: green,
+          backgroundColor: gold,
           foregroundColor: Colors.black,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          textStyle: GoogleFonts.cairo(fontWeight: FontWeight.w700, fontSize: 16),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          textStyle:
+              GoogleFonts.cairo(fontWeight: FontWeight.w700, fontSize: 16),
         ),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: green,
+        backgroundColor: gold,
         foregroundColor: Colors.black,
+      ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: card,
+        contentTextStyle: GoogleFonts.cairo(color: text),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
 
   static ThemeData get dark {
-    final t = _base(
+    return _base(
+      brightness: Brightness.dark,
       bg: AppColors.bg,
       card: AppColors.card,
       cardLight: AppColors.cardLight,
@@ -149,11 +170,11 @@ class AppTheme {
       textDim: AppColors.textDim,
       border: AppColors.border,
     );
-    return t.copyWith(brightness: Brightness.dark);
   }
 
   static ThemeData get light {
-    final t = _base(
+    return _base(
+      brightness: Brightness.light,
       bg: AppLightColors.bg,
       card: AppLightColors.card,
       cardLight: AppLightColors.cardLight,
@@ -165,6 +186,5 @@ class AppTheme {
       textDim: AppLightColors.textDim,
       border: AppLightColors.border,
     );
-    return t.copyWith(brightness: Brightness.light);
   }
 }

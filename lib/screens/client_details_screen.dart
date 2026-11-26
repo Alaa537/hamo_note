@@ -44,6 +44,8 @@ class ClientDetailsScreen extends StatelessWidget {
               await PdfService.shareStatement(
                 client: client,
                 merchantName: p.merchantName,
+                merchantPhone: p.merchantPhone,
+                merchantAddress: p.merchantAddress,
               );
             },
           ),
@@ -153,9 +155,60 @@ class ClientDetailsScreen extends StatelessWidget {
                     Icon(Icons.phone_rounded,
                         size: 14, color: context.appTextDim),
                     const SizedBox(width: 4),
-                    Text(client.phone,
-                        style: TextStyle(
-                            color: context.appTextDim, fontSize: 12)),
+                    Expanded(
+                      child: Text(client.phone,
+                          style: TextStyle(
+                              color: context.appTextDim, fontSize: 12)),
+                    ),
+                    IconButton(
+                      tooltip: 'اتصال',
+                      icon: Icon(Icons.call_rounded,
+                          size: 20, color: context.appGreen),
+                      onPressed: () async {
+                        final uri = Uri(scheme: 'tel', path: client.phone);
+                        if (await canLaunchUrl(uri)) {
+                          await launchUrl(uri);
+                        }
+                      },
+                    ),
+                    IconButton(
+                      tooltip: 'واتساب',
+                      icon: Icon(Icons.chat_rounded,
+                          size: 20, color: context.appGold),
+                      onPressed: () async {
+                        final bal = client.balance;
+                        final status = bal == 0
+                            ? 'متساوي'
+                            : (bal > 0
+                                ? 'لك مبلغ ${bal.abs().toStringAsFixed(2)} ج.م'
+                                : 'عليك مبلغ ${bal.abs().toStringAsFixed(2)} ج.م');
+                        final msg = Uri.encodeComponent(
+                            'مرحباً ${client.name} 👋\n'
+                            'رصيدك الحالي لدى ${p.merchantName}: $status\n'
+                            '— عبر Hamo Note');
+                        final phone = client.phone.replaceAll(RegExp(r'[^0-9+]'), '');
+                        final uri = Uri.parse('https://wa.me/$phone?text=$msg');
+                        if (await canLaunchUrl(uri)) {
+                          await launchUrl(uri, mode: LaunchMode.externalApplication);
+                        }
+                      },
+                    ),
+                    IconButton(
+                      tooltip: 'مشاركة الرصيد نصاً',
+                      icon: Icon(Icons.share_rounded,
+                          size: 20, color: context.appTextDim),
+                      onPressed: () {
+                        final bal = client.balance;
+                        final status = bal == 0
+                            ? 'متساوي'
+                            : (bal > 0
+                                ? 'له ${bal.abs().toStringAsFixed(2)} ج.م'
+                                : 'عليه ${bal.abs().toStringAsFixed(2)} ج.م');
+                        Share.share(
+                          'عميل: ${client.name}\nهاتف: ${client.phone}\nالرصيد: $status\nالتاجر: ${p.merchantName}',
+                        );
+                      },
+                    ),
                   ],
                 ),
                 if (client.note != null && client.note!.isNotEmpty) ...[
@@ -363,16 +416,7 @@ class ClientDetailsScreen extends StatelessWidget {
             icon: Icon(Icons.share_rounded,
                 color: context.appTextDim, size: 20),
             onPressed: () async {
-              final bytes = await PdfService.buildReceipt(
-                client: client,
-                transaction: t,
-                merchantName: p.merchantName,
-                currentBalance: client.balance,
-              );
-              await PdfService.sharePdfAsImage(
-                pdfBytes: bytes,
-                filename: 'Receipt_${client.name}_${t.id}',
-              );
+              await _shareReceipt(context, p, client, t);
             },
           ),
           IconButton(
@@ -477,6 +521,132 @@ class ClientDetailsScreen extends StatelessWidget {
             content: const Text('✅ تم الحفظ بنجاح'),
             backgroundColor: color,
           ),
+        );
+      }
+    }
+  }
+
+
+  Future<void> _shareReceipt(
+    BuildContext context,
+    AppProvider p,
+    Client client,
+    Transaction t,
+  ) async {
+    final sigKey = GlobalKey<SignaturePadState>();
+    Uint8List? signature;
+
+    final action = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: context.appCard,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 16,
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: context.appBorder,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'مشاركة الوصل',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  color: context.appText,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                '${client.name} • ${t.amount.toStringAsFixed(2)} ج.م',
+                style: TextStyle(color: context.appTextDim, fontSize: 13),
+              ),
+              const SizedBox(height: 16),
+              SignaturePad(key: sigKey, height: 140),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: () async {
+                  signature = await sigKey.currentState?.toPngBytes();
+                  if (ctx.mounted) Navigator.pop(ctx, 'image');
+                },
+                icon: const Icon(Icons.image_rounded),
+                label: const Text('مشاركة كصورة (مع التفاصيل)'),
+              ),
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                onPressed: () async {
+                  signature = await sigKey.currentState?.toPngBytes();
+                  if (ctx.mounted) Navigator.pop(ctx, 'pdf');
+                },
+                icon: Icon(Icons.picture_as_pdf_rounded, color: context.appGold),
+                label: Text('مشاركة PDF', style: TextStyle(color: context.appGold)),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: context.appGold),
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('إلغاء'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (action == null || !context.mounted) return;
+
+    try {
+      final bytes = await PdfService.buildReceipt(
+        client: client,
+        transaction: t,
+        merchantName: p.merchantName,
+        currentBalance: client.balance,
+        merchantPhone: p.merchantPhone,
+        merchantAddress: p.merchantAddress,
+        signaturePng: signature,
+      );
+      if (action == 'image') {
+        await PdfService.sharePdfAsImage(
+          pdfBytes: bytes,
+          filename: 'Receipt_${client.name}_${t.id}',
+          shareText:
+              'وصل Hamo Note\nالعميل: ${client.name}\nالمبلغ: ${t.amount.toStringAsFixed(2)} ج.م\nالتاريخ: ${DateFormat('dd/MM/yyyy HH:mm').format(t.date)}',
+        );
+      } else {
+        await PdfService.shareReceipt(
+          client: client,
+          transaction: t,
+          merchantName: p.merchantName,
+          currentBalance: client.balance,
+          merchantPhone: p.merchantPhone,
+          merchantAddress: p.merchantAddress,
+          signaturePng: signature,
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('تعذر إنشاء الوصل: $e')),
         );
       }
     }
