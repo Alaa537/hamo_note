@@ -5,6 +5,8 @@ import '../theme/app_theme.dart';
 import '../widgets/glass_card.dart';
 import '../services/backup_service.dart';
 import 'reports_screen.dart';
+import 'calculator_screen.dart';
+import '../theme/app_theme.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -45,6 +47,65 @@ class SettingsScreen extends StatelessWidget {
                   ),
                 ),
               ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text('خلفية التطبيق',
+              style: TextStyle(color: context.appTextDim, fontSize: 12)),
+          const SizedBox(height: 8),
+          SizedBox(
+            height: 72,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: AppBackgrounds.names.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 10),
+              itemBuilder: (_, i) {
+                final selected = p.bgStyle == i;
+                final cols = AppBackgrounds.colors(i, context.isDark);
+                return GestureDetector(
+                  onTap: () => p.setBgStyle(i),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    width: 86,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: cols,
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: selected ? context.appGold : context.appBorder,
+                        width: selected ? 2.5 : 1,
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        AppBackgrounds.names[i],
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight:
+                              selected ? FontWeight.w800 : FontWeight.w500,
+                          color: context.appText,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 12),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: Icon(Icons.calculate_rounded, color: context.appGold),
+            title: Text('الآلة الحاسبة',
+                style: TextStyle(color: context.appText, fontWeight: FontWeight.w600)),
+            trailing: Icon(Icons.chevron_left_rounded, color: context.appTextDim),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const CalculatorScreen()),
             ),
           ),
           const SizedBox(height: 20),

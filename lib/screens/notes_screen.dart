@@ -141,6 +141,7 @@ class _NotesScreenState extends State<NotesScreen> {
     final titleCtrl = TextEditingController(text: note?.title ?? '');
     final contentCtrl = TextEditingController(text: note?.content ?? '');
     var colorIndex = note?.colorIndex ?? 0;
+    var styleIndex = note?.styleIndex ?? 0;
 
     await showModalBottomSheet(
       context: context,
@@ -239,6 +240,34 @@ class _NotesScreenState extends State<NotesScreen> {
                       );
                     }),
                   ),
+                  const SizedBox(height: 14),
+                  Text('نمط الخط',
+                      style: TextStyle(
+                          color: context.appTextDim, fontSize: 12)),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      for (final e in [
+                        (0, 'عادي'),
+                        (1, 'عنوان بارز'),
+                        (2, 'كبير'),
+                        (3, 'أنيق'),
+                      ])
+                        ChoiceChip(
+                          label: Text(e.$2),
+                          selected: styleIndex == e.$1,
+                          onSelected: (_) => setModal(() => styleIndex = e.$1),
+                          selectedColor: context.appGold.withOpacity(0.35),
+                          labelStyle: TextStyle(
+                            color: context.appText,
+                            fontWeight: styleIndex == e.$1
+                                ? FontWeight.w800
+                                : FontWeight.w500,
+                          ),
+                        ),
+                    ],
+                  ),
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () async {
@@ -254,12 +283,14 @@ class _NotesScreenState extends State<NotesScreen> {
                           title: title.isEmpty ? 'بدون عنوان' : title,
                           content: content,
                           colorIndex: colorIndex,
+                          styleIndex: styleIndex,
                         );
                       } else {
                         note!.title =
                             title.isEmpty ? 'بدون عنوان' : title;
                         note.content = content;
                         note.colorIndex = colorIndex;
+                        note.styleIndex = styleIndex;
                         await p.updateNote(note);
                       }
                       if (ctx.mounted) Navigator.pop(ctx);
@@ -351,11 +382,19 @@ class _NoteCard extends StatelessWidget {
                 child: Text(
                   note.title,
                   style: TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 15,
+                    fontWeight: note.styleIndex == 1 || note.styleIndex == 3
+                        ? FontWeight.w900
+                        : FontWeight.w800,
+                    fontSize: note.styleIndex == 2
+                        ? 18
+                        : (note.styleIndex == 3 ? 16 : 15),
+                    fontStyle: note.styleIndex == 3
+                        ? FontStyle.italic
+                        : FontStyle.normal,
+                    letterSpacing: note.styleIndex == 3 ? 0.6 : 0,
                     color: context.appText,
                   ),
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -383,10 +422,13 @@ class _NoteCard extends StatelessWidget {
               note.content,
               style: TextStyle(
                 color: context.appTextDim,
-                fontSize: 13,
-                height: 1.4,
+                fontSize: note.styleIndex == 2 ? 15 : 13,
+                height: 1.45,
+                fontStyle: note.styleIndex == 3
+                    ? FontStyle.italic
+                    : FontStyle.normal,
               ),
-              maxLines: 4,
+              maxLines: 5,
               overflow: TextOverflow.ellipsis,
             ),
           ],

@@ -210,3 +210,44 @@ class AppTheme {
     );
   }
 }
+
+
+class AppBackgrounds {
+  static const names = [
+    'كلاسيك',
+    'ذهبي ناعم',
+    'منتصف الليل',
+    'نعناعي',
+    'وردي',
+  ];
+
+  static List<Color> colors(int style, bool isDark) {
+    if (isDark) {
+      switch (style) {
+        case 1:
+          return [const Color(0xFF1A1408), const Color(0xFF0B0F1A)];
+        case 2:
+          return [const Color(0xFF0A0E1A), const Color(0xFF1E1B4B)];
+        case 3:
+          return [const Color(0xFF0A1F1A), const Color(0xFF0B0F1A)];
+        case 4:
+          return [const Color(0xFF1A0A14), const Color(0xFF0B0F1A)];
+        default:
+          return [const Color(0xFF0B0F1A), const Color(0xFF0B0F1A)];
+      }
+    } else {
+      switch (style) {
+        case 1:
+          return [const Color(0xFFFFFBEB), const Color(0xFFF8FAFC)];
+        case 2:
+          return [const Color(0xFFEEF2FF), const Color(0xFFF8FAFC)];
+        case 3:
+          return [const Color(0xFFECFDF5), const Color(0xFFF8FAFC)];
+        case 4:
+          return [const Color(0xFFFDF2F8), const Color(0xFFF8FAFC)];
+        default:
+          return [const Color(0xFFF8FAFC), const Color(0xFFF8FAFC)];
+      }
+    }
+  }
+}

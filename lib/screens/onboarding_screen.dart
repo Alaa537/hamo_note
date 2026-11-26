@@ -31,10 +31,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       color: Color(0xFFFFD54F),
     ),
     _OnboardData(
-      icon: Icons.picture_as_pdf_rounded,
+      icon: Icons.image_rounded,
       title: 'اطبع وشارك بضغطة',
       subtitle:
-          'وصل كامل التفاصيل: اليوم، التاريخ، اسم العميل، المبلغ، الرصيد والتوقيع — شاركه PDF أو صورة احترافية.',
+          'وصل كامل التفاصيل: اليوم، التاريخ، اسم العميل، المبلغ، الرصيد وتوقيع Mohamed Rabea — شاركه كصورة احترافية.',
       color: Color(0xFF2196F3),
     ),
     _OnboardData(

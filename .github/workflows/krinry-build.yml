@@ -60,6 +60,37 @@ jobs:
           sed -i 's|android:name="io.flutter.app.FlutterApplication"|android:name="${applicationName}"|' android/app/src/main/AndroidManifest.xml || true
           sed -i 's|android:label="hamo_note"|android:label="Hamo Note"|g' android/app/src/main/AndroidManifest.xml || true
 
+
+      - name: Restrict ABIs to ARM32 + ARM64 only
+        run: |
+          APP_GRADLE="android/app/build.gradle"
+          if [ -f "$APP_GRADLE" ]; then
+            if ! grep -q "abiFilters" "$APP_GRADLE"; then
+              # Insert inside defaultConfig block if possible
+              python3 - << 'PY'
+          from pathlib import Path
+          p = Path("android/app/build.gradle")
+          t = p.read_text()
+          if "abiFilters" not in t:
+              needle = "defaultConfig {"
+              if needle in t:
+                  t = t.replace(
+                      needle,
+                      needle + """
+                  ndk {
+                      abiFilters 'armeabi-v7a', 'arm64-v8a'
+                  }
+          """,
+                      1,
+                  )
+                  p.write_text(t)
+                  print("abiFilters injected")
+              else:
+                  print("defaultConfig not found")
+          PY
+            fi
+          fi
+
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
@@ -70,11 +101,11 @@ jobs:
           TYPE="${{ github.event.inputs.build_type }}"
           OUT="${{ github.event.inputs.output_type }}"
           if [ "$OUT" = "apk" ]; then
-            flutter build apk --$TYPE
+            flutter build apk --$TYPE --target-platform android-arm,android-arm64
           elif [ "$OUT" = "apk-split" ]; then
-            flutter build apk --$TYPE --split-per-abi
+            flutter build apk --$TYPE --split-per-abi --target-platform android-arm,android-arm64
           elif [ "$OUT" = "appbundle" ]; then
-            flutter build appbundle --$TYPE
+            flutter build appbundle --$TYPE --target-platform android-arm,android-arm64
           fi
 
       - name: Diagnose — find all produced APKs

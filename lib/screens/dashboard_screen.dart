@@ -12,6 +12,8 @@ import 'merchant_screen.dart';
 import 'add_client_screen.dart';
 import 'notes_screen.dart';
 import 'reports_screen.dart';
+import 'calculator_screen.dart';
+import '../theme/app_theme.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -22,9 +24,18 @@ class DashboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final p = context.watch<AppProvider>();
 
+    final bgColors = AppBackgrounds.colors(p.bgStyle, context.isDark);
     return Scaffold(
-      body: SafeArea(
-        child: RefreshIndicator(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: bgColors,
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SafeArea(
+          child: RefreshIndicator(
           color: context.appGreen,
           onRefresh: () => p.init(),
           child: ListView(
@@ -287,6 +298,20 @@ class DashboardScreen extends StatelessWidget {
                       ),
                     ),
                   ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _quickActionButton(
+                      context,
+                      icon: Icons.calculate_rounded,
+                      label: 'حاسبة',
+                      color: context.appGold,
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => const CalculatorScreen()),
+                      ),
+                    ),
+                  ),
                 ],
               ).animate().fadeIn(delay: 380.ms).slideY(begin: 0.1),
 
@@ -366,6 +391,7 @@ class DashboardScreen extends StatelessWidget {
                 }),
             ],
           ),
+        ),
         ),
       ),
     );

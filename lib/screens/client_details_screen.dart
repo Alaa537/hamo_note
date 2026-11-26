@@ -8,7 +8,6 @@ import 'package:url_launcher/url_launcher.dart';
 import '../models/client.dart';
 import '../models/transaction.dart';
 import '../providers/app_provider.dart';
-import '../services/pdf_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/signature_pad.dart';
@@ -43,15 +42,22 @@ class ClientDetailsScreen extends StatelessWidget {
             ),
           ),
           IconButton(
-            tooltip: 'مشاركة كشف الحساب PDF',
-            icon: const Icon(Icons.picture_as_pdf_rounded),
+            tooltip: 'مشاركة كشف الحساب',
+            icon: const Icon(Icons.ios_share_rounded),
             onPressed: () async {
-              await PdfService.shareStatement(
-                client: client,
-                merchantName: p.merchantName,
-                merchantPhone: p.merchantPhone,
-                merchantAddress: p.merchantAddress,
-              );
+              final buf = StringBuffer();
+              buf.writeln('كشف حساب — ${client.name}');
+              buf.writeln('التاجر: ${p.merchantName}');
+              buf.writeln('الهاتف: ${client.phone}');
+              buf.writeln('الرصيد: ${client.balance.abs().toStringAsFixed(2)} ج.م (${client.balance >= 0 ? "له" : "عليه"})');
+              buf.writeln('────────────────');
+              for (final t in client.transactions.reversed) {
+                buf.writeln('${DateFormat('dd/MM/yyyy HH:mm').format(t.date)} | ${t.type.arName} | ${t.amount.toStringAsFixed(2)} ج.م${t.note.isNotEmpty ? " | ${t.note}" : ""}');
+              }
+              buf.writeln('────────────────');
+              buf.writeln('التوقيع: Mohamed Rabea');
+              buf.writeln('Hamo Note');
+              await Share.share(buf.toString());
             },
           ),
           PopupMenuButton<String>(
@@ -538,105 +544,15 @@ class ClientDetailsScreen extends StatelessWidget {
     Client client,
     Transaction t,
   ) async {
-    final choice = await showModalBottomSheet<String>(
+    await ReceiptPreview.showAndShare(
       context: context,
-      backgroundColor: context.appCard,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (ctx) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 14, 20, 20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: context.appBorder,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 14),
-                Text(
-                  'مشاركة الوصل',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    color: context.appText,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${client.name} • ${t.amount.toStringAsFixed(2)} ج.م',
-                  style: TextStyle(color: context.appTextDim, fontSize: 13),
-                ),
-                const SizedBox(height: 18),
-                ElevatedButton.icon(
-                  onPressed: () => Navigator.pop(ctx, 'image'),
-                  icon: const Icon(Icons.image_rounded),
-                  label: const Text('مشاركة كصورة (موصى به)'),
-                ),
-                const SizedBox(height: 10),
-                OutlinedButton.icon(
-                  onPressed: () => Navigator.pop(ctx, 'pdf'),
-                  icon: Icon(Icons.picture_as_pdf_rounded,
-                      color: context.appGold),
-                  label: Text('مشاركة PDF',
-                      style: TextStyle(color: context.appGold)),
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: context.appGold),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  child: const Text('إلغاء'),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
+      client: client,
+      transaction: t,
+      merchantName: p.merchantName,
+      merchantPhone: p.merchantPhone,
+      merchantAddress: p.merchantAddress,
+      currentBalance: client.balance,
     );
-
-    if (choice == null || !context.mounted) return;
-
-    if (choice == 'image') {
-      await ReceiptPreview.showAndShare(
-        context: context,
-        client: client,
-        transaction: t,
-        merchantName: p.merchantName,
-        merchantPhone: p.merchantPhone,
-        merchantAddress: p.merchantAddress,
-        currentBalance: client.balance,
-      );
-      return;
-    }
-
-    // PDF path
-    try {
-      await PdfService.shareReceipt(
-        client: client,
-        transaction: t,
-        merchantName: p.merchantName,
-        currentBalance: client.balance,
-        merchantPhone: p.merchantPhone,
-        merchantAddress: p.merchantAddress,
-      );
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('تعذر إنشاء PDF: $e')),
-        );
-      }
-    }
   }
 
   void _addTx(BuildContext ctx, String id, TxType type) {

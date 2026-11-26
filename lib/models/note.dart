@@ -5,6 +5,7 @@ class Note {
   final DateTime createdAt;
   DateTime updatedAt;
   int colorIndex; // 0..5 soft pastel indices
+  int styleIndex; // 0 normal, 1 bold title, 2 large, 3 elegant
   bool pinned;
 
   Note({
@@ -14,6 +15,7 @@ class Note {
     required this.createdAt,
     DateTime? updatedAt,
     this.colorIndex = 0,
+    this.styleIndex = 0,
     this.pinned = false,
   }) : updatedAt = updatedAt ?? createdAt;
 
@@ -24,6 +26,7 @@ class Note {
         'createdAt': createdAt.toIso8601String(),
         'updatedAt': updatedAt.toIso8601String(),
         'colorIndex': colorIndex,
+        'styleIndex': styleIndex,
         'pinned': pinned,
       };
 
@@ -36,6 +39,7 @@ class Note {
             ? DateTime.parse(j['updatedAt'] as String)
             : DateTime.parse(j['createdAt'] as String),
         colorIndex: j['colorIndex'] as int? ?? 0,
+        styleIndex: j['styleIndex'] as int? ?? 0,
         pinned: j['pinned'] as bool? ?? false,
       );
 }

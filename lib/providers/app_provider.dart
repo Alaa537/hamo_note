@@ -16,7 +16,8 @@ class AppProvider extends ChangeNotifier {
   String merchantAddress = '';
   String? pinCode;
   bool pinEnabled = false;
-  ThemeMode themeMode = ThemeMode.dark;
+  ThemeMode themeMode = ThemeMode.light;
+  int bgStyle = 0; // 0 classic, 1 soft gold, 2 midnight, 3 mint, 4 rose
   bool onboardingShown = false;
   bool loading = true;
 
@@ -48,11 +49,12 @@ class AppProvider extends ChangeNotifier {
     merchantPhone = await _storage.loadMerchantPhone();
     merchantAddress = await _storage.loadMerchantAddress();
     final sp = await SharedPreferences.getInstance();
-    final modeStr = sp.getString('hmn_theme_mode') ?? 'dark';
+    final modeStr = sp.getString('hmn_theme_mode') ?? 'light';
     themeMode = ThemeMode.values.firstWhere(
       (m) => m.name == modeStr,
-      orElse: () => ThemeMode.dark,
+      orElse: () => ThemeMode.light,
     );
+    bgStyle = sp.getInt('hmn_bg_style') ?? 0;
     onboardingShown = sp.getBool('hmn_onboarding_shown') ?? false;
     pinEnabled = sp.getBool('hmn_pin_enabled') ?? false;
     pinCode = sp.getString('hmn_pin');
@@ -61,6 +63,13 @@ class AppProvider extends ChangeNotifier {
   }
 
   String _uid() => DateTime.now().microsecondsSinceEpoch.toString();
+
+  Future<void> setBgStyle(int style) async {
+    bgStyle = style.clamp(0, 4);
+    final sp = await SharedPreferences.getInstance();
+    await sp.setInt('hmn_bg_style', bgStyle);
+    notifyListeners();
+  }
 
   Future<void> setThemeMode(ThemeMode mode) async {
     themeMode = mode;
@@ -158,6 +167,7 @@ class AppProvider extends ChangeNotifier {
     required String title,
     required String content,
     int colorIndex = 0,
+    int styleIndex = 0,
   }) async {
     notes.insert(
       0,
@@ -167,6 +177,7 @@ class AppProvider extends ChangeNotifier {
         content: content,
         createdAt: DateTime.now(),
         colorIndex: colorIndex,
+        styleIndex: styleIndex,
       ),
     );
     await _storage.saveNotes(notes);
