@@ -329,7 +329,10 @@ class PdfService {
     return doc.save();
   }
 
+
   // ───────────────────────── Receipt (وصل) ─────────────────────────
+  static const String fixedSignature = 'Mohamed Rabea';
+
   static Future<Uint8List> buildReceipt({
     required Client client,
     required Transaction transaction,
@@ -341,8 +344,6 @@ class PdfService {
   }) async {
     final font = await _reg();
     final bold = await _bold();
-    final doc = pw.Document();
-    final theme = pw.ThemeData.withFont(base: font, bold: bold);
     final isCredit = transaction.type == TxType.credit;
     final themeColor =
         isCredit ? PdfColor.fromHex('#16A34A') : PdfColor.fromHex('#DC2626');
@@ -352,220 +353,217 @@ class PdfService {
     final receiptNo =
         'R-${transaction.id.length > 6 ? transaction.id.substring(transaction.id.length - 6) : transaction.id}';
 
-    // Fixed thermal-like size (pdfx/raster cannot handle infinite height)
-    final pageFormat = PdfPageFormat(
-      80 * PdfPageFormat.mm,
-      200 * PdfPageFormat.mm,
-      marginAll: 6 * PdfPageFormat.mm,
+    final doc = pw.Document(
+      theme: pw.ThemeData.withFont(base: font, bold: bold),
     );
 
-    doc.addPage(pw.Page(
-      pageFormat: pageFormat,
-      theme: theme,
-      textDirection: pw.TextDirection.rtl,
-      build: (ctx) => pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.stretch,
-        mainAxisSize: pw.MainAxisSize.min,
-        children: [
-          // Logo + brand
-          pw.Center(
-            child: pw.Container(
-              width: 40,
-              height: 40,
-              decoration: pw.BoxDecoration(
-                color: PdfColor.fromHex('#FBBF24'),
-                shape: pw.BoxShape.circle,
+    // Use standard A5 portrait — most reliable for Printing.sharePdf
+    doc.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a5,
+        margin: const pw.EdgeInsets.all(28),
+        textDirection: pw.TextDirection.rtl,
+        build: (ctx) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+            children: [
+              pw.Center(
+                child: pw.Container(
+                  width: 52,
+                  height: 52,
+                  decoration: pw.BoxDecoration(
+                    color: PdfColor.fromHex('#FBBF24'),
+                    shape: pw.BoxShape.circle,
+                  ),
+                  child: pw.Center(
+                    child: pw.Text(
+                      'H',
+                      style: pw.TextStyle(
+                        font: bold,
+                        fontSize: 26,
+                        color: PdfColors.black,
+                      ),
+                    ),
+                  ),
+                ),
               ),
-              child: pw.Center(
-                child: pw.Text('H',
+              pw.SizedBox(height: 8),
+              pw.Center(
+                child: pw.Text(
+                  'Hamo Note',
+                  style: pw.TextStyle(font: bold, fontSize: 20),
+                ),
+              ),
+              pw.Center(
+                child: pw.Text(
+                  merchantName,
+                  style: pw.TextStyle(font: bold, fontSize: 13),
+                ),
+              ),
+              if (merchantPhone.isNotEmpty)
+                pw.Center(
+                  child: pw.Text(
+                    merchantPhone,
                     style: pw.TextStyle(
-                        font: bold, fontSize: 20, color: PdfColors.black)),
-              ),
-            ),
-          ),
-          pw.SizedBox(height: 6),
-          pw.Center(
-            child: pw.Text('Hamo Note',
-                style: pw.TextStyle(font: bold, fontSize: 16)),
-          ),
-          pw.Center(
-            child: pw.Text(merchantName,
-                style: pw.TextStyle(
-                    font: bold,
-                    fontSize: 11,
-                    color: PdfColor.fromHex('#0F172A'))),
-          ),
-          if (merchantPhone.isNotEmpty)
-            pw.Center(
-              child: pw.Text(merchantPhone,
-                  style: pw.TextStyle(
+                      font: font,
+                      fontSize: 10,
+                      color: PdfColor.fromHex('#64748B'),
+                    ),
+                  ),
+                ),
+              if (merchantAddress.isNotEmpty)
+                pw.Center(
+                  child: pw.Text(
+                    merchantAddress,
+                    style: pw.TextStyle(
                       font: font,
                       fontSize: 9,
-                      color: PdfColor.fromHex('#64748B'))),
-            ),
-          if (merchantAddress.isNotEmpty)
-            pw.Center(
-              child: pw.Text(merchantAddress,
+                      color: PdfColor.fromHex('#64748B'),
+                    ),
+                  ),
+                ),
+              pw.SizedBox(height: 12),
+              _dashed(),
+              pw.SizedBox(height: 8),
+              pw.Center(
+                child: pw.Text(
+                  transaction.isSettlement ? 'وصل تسوية' : 'وصل عملية',
+                  style: pw.TextStyle(font: bold, fontSize: 15),
+                ),
+              ),
+              pw.Center(
+                child: pw.Text(
+                  'رقم: $receiptNo',
                   style: pw.TextStyle(
-                      font: font,
-                      fontSize: 8,
-                      color: PdfColor.fromHex('#64748B'))),
-            ),
-          pw.SizedBox(height: 8),
-          _dashed(),
-          pw.SizedBox(height: 6),
-          pw.Center(
-            child: pw.Text(
-              transaction.isSettlement ? 'وصل تسوية' : 'وصل عملية',
-              style: pw.TextStyle(font: bold, fontSize: 13),
-            ),
-          ),
-          pw.Center(
-            child: pw.Text('رقم: $receiptNo',
-                style: pw.TextStyle(
+                    font: font,
+                    fontSize: 10,
+                    color: PdfColor.fromHex('#64748B'),
+                  ),
+                ),
+              ),
+              pw.SizedBox(height: 8),
+              _dashed(),
+              pw.SizedBox(height: 10),
+              _detailRow('اليوم', day, font, bold),
+              _detailRow(
+                'تاريخ العملية',
+                _shortTimeFmt.format(transaction.date),
+                font,
+                bold,
+              ),
+              _detailRow('اسم العميل', client.name, font, bold),
+              _detailRow('هاتف العميل', client.phone, font, bold),
+              _detailRow('الفئة', client.category.arName, font, bold),
+              pw.SizedBox(height: 8),
+              _dashed(),
+              pw.SizedBox(height: 8),
+              _detailRow('نوع العملية', transaction.type.arVerb, font, bold),
+              if (transaction.isSettlement)
+                _detailRow('الحالة', 'تسوية كاملة', font, bold),
+              pw.SizedBox(height: 12),
+              pw.Container(
+                padding: const pw.EdgeInsets.symmetric(
+                  vertical: 14,
+                  horizontal: 12,
+                ),
+                decoration: pw.BoxDecoration(
+                  color: themeBg,
+                  borderRadius: pw.BorderRadius.circular(10),
+                  border: pw.Border.all(color: themeColor, width: 1.5),
+                ),
+                child: pw.Column(
+                  children: [
+                    pw.Text(
+                      'المبلغ',
+                      style: pw.TextStyle(
+                        font: font,
+                        fontSize: 11,
+                        color: PdfColor.fromHex('#64748B'),
+                      ),
+                    ),
+                    pw.SizedBox(height: 4),
+                    pw.Text(
+                      '${transaction.amount.toStringAsFixed(2)} ج.م',
+                      style: pw.TextStyle(
+                        font: bold,
+                        fontSize: 24,
+                        color: themeColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (transaction.note.isNotEmpty) ...[
+                pw.SizedBox(height: 10),
+                _detailRow('ملاحظة', transaction.note, font, bold),
+              ],
+              pw.SizedBox(height: 10),
+              _dashed(),
+              pw.SizedBox(height: 8),
+              _detailRow(
+                'الرصيد بعد العملية',
+                '${currentBalance.abs().toStringAsFixed(2)} ج.م (${currentBalance >= 0 ? "له" : "عليه"})',
+                font,
+                bold,
+              ),
+              pw.SizedBox(height: 8),
+              _dashed(),
+              pw.SizedBox(height: 18),
+              pw.Center(
+                child: pw.Text(
+                  'التوقيع',
+                  style: pw.TextStyle(
+                    font: font,
+                    fontSize: 11,
+                    color: PdfColor.fromHex('#64748B'),
+                  ),
+                ),
+              ),
+              pw.SizedBox(height: 6),
+              pw.Center(
+                child: pw.Text(
+                  fixedSignature,
+                  style: pw.TextStyle(
+                    font: bold,
+                    fontSize: 16,
+                    color: PdfColor.fromHex('#0F172A'),
+                    fontStyle: pw.FontStyle.italic,
+                  ),
+                ),
+              ),
+              pw.SizedBox(height: 4),
+              pw.Center(
+                child: pw.Container(
+                  width: 140,
+                  height: 1.2,
+                  color: PdfColor.fromHex('#94A3B8'),
+                ),
+              ),
+              pw.Spacer(),
+              pw.Center(
+                child: pw.Text(
+                  'شكراً لتعاملكم',
+                  style: pw.TextStyle(font: bold, fontSize: 13),
+                ),
+              ),
+              pw.SizedBox(height: 4),
+              pw.Center(
+                child: pw.Text(
+                  'Hamo Note • ${_dateFmt.format(DateTime.now())}',
+                  style: pw.TextStyle(
                     font: font,
                     fontSize: 9,
-                    color: PdfColor.fromHex('#64748B'))),
-          ),
-          pw.SizedBox(height: 6),
-          _dashed(),
-          pw.SizedBox(height: 8),
-
-          // Details block — full info
-          _detailRow('اليوم', day, font, bold),
-          _detailRow('تاريخ العملية', _shortTimeFmt.format(transaction.date),
-              font, bold),
-          _detailRow('اسم العميل', client.name, font, bold),
-          _detailRow('هاتف العميل', client.phone, font, bold),
-          _detailRow('الفئة', client.category.arName, font, bold),
-          pw.SizedBox(height: 6),
-          _dashed(),
-          pw.SizedBox(height: 6),
-          _detailRow('نوع العملية', transaction.type.arVerb, font, bold),
-          if (transaction.isSettlement)
-            _detailRow('الحالة', 'تسوية كاملة', font, bold),
-
-          pw.SizedBox(height: 8),
-          // Amount highlight
-          pw.Container(
-            padding:
-                const pw.EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-            decoration: pw.BoxDecoration(
-              color: themeBg,
-              borderRadius: pw.BorderRadius.circular(8),
-              border: pw.Border.all(color: themeColor, width: 1.2),
-            ),
-            child: pw.Column(children: [
-              pw.Text('المبلغ',
-                  style: pw.TextStyle(
-                      font: font,
-                      fontSize: 9,
-                      color: PdfColor.fromHex('#64748B'))),
-              pw.SizedBox(height: 2),
-              pw.Text('${transaction.amount.toStringAsFixed(2)} ج.م',
-                  style: pw.TextStyle(
-                      font: bold, fontSize: 20, color: themeColor)),
-            ]),
-          ),
-
-          if (transaction.note.isNotEmpty) ...[
-            pw.SizedBox(height: 8),
-            _detailRow('ملاحظة', transaction.note, font, bold),
-          ],
-
-          pw.SizedBox(height: 8),
-          _dashed(),
-          pw.SizedBox(height: 6),
-          _detailRow(
-            'الرصيد بعد العملية',
-            '${currentBalance.abs().toStringAsFixed(2)} ج.م (${currentBalance >= 0 ? "له" : "عليه"})',
-            font,
-            bold,
-          ),
-          pw.SizedBox(height: 6),
-          _dashed(),
-
-          // Signature area
-          if (signaturePng != null) ...[
-            pw.SizedBox(height: 10),
-            pw.Center(
-              child: pw.Text('التوقيع',
-                  style: pw.TextStyle(
-                      font: font,
-                      fontSize: 9,
-                      color: PdfColor.fromHex('#64748B'))),
-            ),
-            pw.SizedBox(height: 4),
-            pw.Center(
-              child: pw.Image(
-                pw.MemoryImage(signaturePng),
-                width: 120,
-                height: 48,
-                fit: pw.BoxFit.contain,
+                    color: PdfColor.fromHex('#94A3B8'),
+                  ),
+                ),
               ),
-            ),
-          ] else ...[
-            pw.SizedBox(height: 12),
-            pw.Center(
-              child: pw.Text('توقيع التاجر / العميل',
-                  style: pw.TextStyle(
-                      font: font,
-                      fontSize: 9,
-                      color: PdfColor.fromHex('#94A3B8'))),
-            ),
-            pw.SizedBox(height: 18),
-            pw.Center(
-              child: pw.Container(
-                width: 100,
-                height: 1,
-                color: PdfColor.fromHex('#CBD5E1'),
-              ),
-            ),
-          ],
-
-          pw.SizedBox(height: 12),
-          pw.Center(
-            child: pw.Text('شكراً لتعاملكم',
-                style: pw.TextStyle(font: bold, fontSize: 11)),
-          ),
-          pw.SizedBox(height: 2),
-          pw.Center(
-            child: pw.Text('Hamo Note • ${_dateFmt.format(DateTime.now())}',
-                style: pw.TextStyle(
-                    font: font,
-                    fontSize: 8,
-                    color: PdfColor.fromHex('#94A3B8'))),
-          ),
-          pw.SizedBox(height: 8),
-        ],
+            ],
+          );
+        },
       ),
-    ));
+    );
 
     return doc.save();
-  }
-
-  // ───────────────────────── Share / Print helpers ─────────────────────────
-  static Future<void> shareStatement({
-    required Client client,
-    required String merchantName,
-    String merchantPhone = '',
-    String merchantAddress = '',
-  }) async {
-    try {
-      final bytes = await buildStatement(
-        client: client,
-        merchantName: merchantName,
-        merchantPhone: merchantPhone,
-        merchantAddress: merchantAddress,
-      );
-      await Printing.sharePdf(
-        bytes: bytes,
-        filename:
-            'HamoNote_Statement_${client.name}_${DateTime.now().millisecondsSinceEpoch}.pdf',
-      );
-    } catch (e) {
-      rethrow;
-    }
   }
 
   static Future<void> shareReceipt({
@@ -586,6 +584,9 @@ class PdfService {
       merchantAddress: merchantAddress,
       signaturePng: signaturePng,
     );
+    if (bytes.isEmpty) {
+      throw Exception('ملف PDF فاضي');
+    }
     await Printing.sharePdf(
       bytes: bytes,
       filename:

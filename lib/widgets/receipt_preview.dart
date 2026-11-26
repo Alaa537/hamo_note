@@ -9,7 +9,6 @@ import 'dart:io';
 import '../models/client.dart';
 import '../models/transaction.dart';
 import '../theme/app_theme.dart';
-import 'signature_pad.dart';
 
 /// Professional receipt widget + capture/share helpers.
 /// Image share uses RepaintBoundary (no PDF raster) — rock solid on devices.
@@ -187,40 +186,33 @@ class ReceiptPreview extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             _dash(),
-            if (signaturePng != null) ...[
-              const SizedBox(height: 12),
-              const Center(
-                child: Text(
-                  'التوقيع',
-                  style: TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+            const SizedBox(height: 14),
+            const Center(
+              child: Text(
+                'التوقيع',
+                style: TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+              ),
+            ),
+            const SizedBox(height: 6),
+            const Center(
+              child: Text(
+                'Mohamed Rabea',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  fontStyle: FontStyle.italic,
+                  color: Color(0xFF0F172A),
                 ),
               ),
-              const SizedBox(height: 4),
-              Center(
-                child: Image.memory(
-                  signaturePng!,
-                  width: 140,
-                  height: 56,
-                  fit: BoxFit.contain,
-                ),
+            ),
+            const SizedBox(height: 4),
+            Center(
+              child: Container(
+                width: 140,
+                height: 1.2,
+                color: const Color(0xFF94A3B8),
               ),
-            ] else ...[
-              const SizedBox(height: 14),
-              const Center(
-                child: Text(
-                  'توقيع التاجر / العميل',
-                  style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Center(
-                child: Container(
-                  width: 120,
-                  height: 1,
-                  color: const Color(0xFFCBD5E1),
-                ),
-              ),
-            ],
+            ),
             const SizedBox(height: 14),
             const Center(
               child: Text(
@@ -297,6 +289,7 @@ class ReceiptPreview extends StatelessWidget {
   }
 
   /// Full share-as-image flow with optional signature pad.
+
   static Future<void> showAndShare({
     required BuildContext context,
     required Client client,
@@ -307,150 +300,138 @@ class ReceiptPreview extends StatelessWidget {
     String merchantAddress = '',
   }) async {
     final boundaryKey = GlobalKey();
-    final sigKey = GlobalKey<SignaturePadState>();
 
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: context.appCard,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
+      backgroundColor: Colors.transparent,
       builder: (ctx) {
-        return SafeArea(
-          child: Padding(
-            padding: EdgeInsets.only(
-              left: 16,
-              right: 16,
-              top: 12,
-              bottom: MediaQuery.of(ctx).viewInsets.bottom + 16,
-            ),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: context.appBorder,
-                        borderRadius: BorderRadius.circular(4),
+        return Container(
+          decoration: BoxDecoration(
+            color: context.appCard,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.25),
+                blurRadius: 30,
+                offset: const Offset(0, -8),
+              ),
+            ],
+          ),
+          child: SafeArea(
+            child: Padding(
+              padding: EdgeInsets.only(
+                left: 16,
+                right: 16,
+                top: 12,
+                bottom: MediaQuery.of(ctx).viewInsets.bottom + 16,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 44,
+                        height: 5,
+                        decoration: BoxDecoration(
+                          color: context.appBorder,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'مشاركة الوصل',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      color: context.appText,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${client.name} • ${transaction.amount.toStringAsFixed(2)} ج.م',
-                    style: TextStyle(color: context.appTextDim, fontSize: 13),
-                  ),
-                  const SizedBox(height: 12),
-                  // Live preview (this is what gets captured)
-                  Center(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.15),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      clipBehavior: Clip.antiAlias,
-                      child: ReceiptPreview(
-                        boundaryKey: boundaryKey,
-                        client: client,
-                        transaction: transaction,
-                        merchantName: merchantName,
-                        merchantPhone: merchantPhone,
-                        merchantAddress: merchantAddress,
-                        currentBalance: currentBalance,
+                    const SizedBox(height: 14),
+                    Text(
+                      'معاينة الوصل',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: context.appText,
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 14),
-                  Text(
-                    'التوقيع (اختياري)',
-                    style: TextStyle(
-                      color: context.appTextDim,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
+                    const SizedBox(height: 4),
+                    Text(
+                      '${client.name} • ${transaction.amount.toStringAsFixed(2)} ج.م',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: context.appTextDim, fontSize: 13),
                     ),
-                  ),
-                  const SizedBox(height: 6),
-                  SignaturePad(key: sigKey, height: 110),
-                  const SizedBox(height: 14),
-                  ElevatedButton.icon(
-                    onPressed: () async {
-                      try {
-                        final sig = await sigKey.currentState?.toPngBytes();
-                        Uint8List? png;
-                        if (sig != null && sig.isNotEmpty) {
-                          png = await _captureWithSignature(
-                            context: context,
-                            client: client,
-                            transaction: transaction,
-                            merchantName: merchantName,
-                            merchantPhone: merchantPhone,
-                            merchantAddress: merchantAddress,
-                            currentBalance: currentBalance,
-                            signaturePng: sig,
-                          );
-                        }
-                        png ??= await capture(boundaryKey);
-                        if (png == null || png.isEmpty) {
-                          if (ctx.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('تعذر التقاط صورة الوصل'),
-                              ),
+                    const SizedBox(height: 14),
+                    Center(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.18),
+                              blurRadius: 20,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: ReceiptPreview(
+                          boundaryKey: boundaryKey,
+                          client: client,
+                          transaction: transaction,
+                          merchantName: merchantName,
+                          merchantPhone: merchantPhone,
+                          merchantAddress: merchantAddress,
+                          currentBalance: currentBalance,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    SizedBox(
+                      height: 52,
+                      child: ElevatedButton.icon(
+                        onPressed: () async {
+                          try {
+                            final png = await capture(boundaryKey);
+                            if (png == null || png.isEmpty) {
+                              if (ctx.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('تعذر التقاط صورة الوصل'),
+                                  ),
+                                );
+                              }
+                              return;
+                            }
+                            final dir = await getTemporaryDirectory();
+                            final file = File(
+                              '${dir.path}/HamoNote_Receipt_${DateTime.now().millisecondsSinceEpoch}.png',
                             );
+                            await file.writeAsBytes(png);
+                            await Share.shareXFiles(
+                              [XFile(file.path)],
+                              text:
+                                  'وصل Hamo Note\nالعميل: ${client.name}\nالمبلغ: ${transaction.amount.toStringAsFixed(2)} ج.م\nالتاريخ: ${DateFormat('dd/MM/yyyy HH:mm').format(transaction.date)}\nالتوقيع: Mohamed Rabea',
+                            );
+                            try {
+                              await file.delete();
+                            } catch (_) {}
+                            if (ctx.mounted) Navigator.pop(ctx);
+                          } catch (e) {
+                            if (ctx.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('خطأ المشاركة: $e')),
+                              );
+                            }
                           }
-                          return;
-                        }
-                        final dir = await getTemporaryDirectory();
-                        final file = File(
-                          '${dir.path}/HamoNote_Receipt_${DateTime.now().millisecondsSinceEpoch}.png',
-                        );
-                        await file.writeAsBytes(png);
-                        await Share.shareXFiles(
-                          [XFile(file.path)],
-                          text:
-                              'وصل Hamo Note\nالعميل: ${client.name}\nالمبلغ: ${transaction.amount.toStringAsFixed(2)} ج.م\nالتاريخ: ${DateFormat('dd/MM/yyyy HH:mm').format(transaction.date)}',
-                        );
-                        try {
-                          await file.delete();
-                        } catch (_) {}
-                        if (ctx.mounted) Navigator.pop(ctx);
-                      } catch (e) {
-                        if (ctx.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('خطأ المشاركة: $e')),
-                          );
-                        }
-                      }
-                    },
-                    icon: const Icon(Icons.image_rounded),
-                    label: const Text('مشاركة كصورة'),
-                  ),
-                  const SizedBox(height: 8),
-                  TextButton(
-                    onPressed: () => Navigator.pop(ctx),
-                    child: const Text('إلغاء'),
-                  ),
-                ],
+                        },
+                        icon: const Icon(Icons.share_rounded),
+                        label: const Text('مشاركة الصورة'),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      child: const Text('إغلاق'),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -459,40 +440,5 @@ class ReceiptPreview extends StatelessWidget {
     );
   }
 
-  static Future<Uint8List?> _captureWithSignature({
-    required BuildContext context,
-    required Client client,
-    required Transaction transaction,
-    required String merchantName,
-    required double currentBalance,
-    required Uint8List signaturePng,
-    String merchantPhone = '',
-    String merchantAddress = '',
-  }) async {
-    final key = GlobalKey();
-    final completerOverlay = OverlayEntry(
-      builder: (ctx) => Positioned(
-        left: -5000,
-        top: 0,
-        child: Material(
-          color: Colors.transparent,
-          child: ReceiptPreview(
-            boundaryKey: key,
-            client: client,
-            transaction: transaction,
-            merchantName: merchantName,
-            merchantPhone: merchantPhone,
-            merchantAddress: merchantAddress,
-            currentBalance: currentBalance,
-            signaturePng: signaturePng,
-          ),
-        ),
-      ),
-    );
-    Overlay.of(context).insert(completerOverlay);
-    await Future<void>.delayed(const Duration(milliseconds: 120));
-    final bytes = await capture(key);
-    completerOverlay.remove();
-    return bytes;
-  }
+
 }

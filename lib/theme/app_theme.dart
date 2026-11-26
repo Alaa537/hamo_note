@@ -135,24 +135,46 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: gold,
           foregroundColor: Colors.black,
-          elevation: 0,
+          elevation: 2,
+          shadowColor: gold.withOpacity(0.45),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          minimumSize: const Size.fromHeight(52),
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
           textStyle:
-              GoogleFonts.cairo(fontWeight: FontWeight.w700, fontSize: 16),
+              GoogleFonts.cairo(fontWeight: FontWeight.w800, fontSize: 16),
         ),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: gold,
         foregroundColor: Colors.black,
+        elevation: 6,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       ),
       snackBarTheme: SnackBarThemeData(
         backgroundColor: card,
-        contentTextStyle: GoogleFonts.cairo(color: text),
+        contentTextStyle: GoogleFonts.cairo(color: text, fontWeight: FontWeight.w600),
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        elevation: 8,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: card,
+        elevation: 12,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        titleTextStyle: GoogleFonts.cairo(
+          color: text, fontSize: 18, fontWeight: FontWeight.w800,
+        ),
+        contentTextStyle: GoogleFonts.cairo(color: textDim, fontSize: 14),
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: card,
+        elevation: 16,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+      ),
+      dividerTheme: DividerThemeData(color: border, thickness: 1, space: 1),
     );
   }
 
